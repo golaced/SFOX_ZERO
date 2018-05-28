@@ -10,6 +10,7 @@ struct T_axis{
   float acc_fir[1];
   float mag_raw[DATA_LEN];
   float mag_fir[1];
+  float mag_h[1];
   float euler_deg;
   float euler_rad;
 };

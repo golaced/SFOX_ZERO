@@ -90,7 +90,7 @@ int ANO_sending(int mode)
 		if ((get_data_from_ANO == 0) && (send_pid_para == 0))//�������ݷ��ͳ�ͻ
 		{
 			ANO_send_15_data(
-				(int16_t)(anchor[1].distance_mm), (int16_t)(anchor[3].distance_mm), (int16_t)(RC_PWM[2]),
+				(int16_t)(t_pitch.mag_h[0]*100), (int16_t)(t_roll.mag_h[0]*100), (int16_t)(RC_PWM[2]),
 				(int16_t)(magx_raw_uT), (int16_t)(magy_raw_uT), (int16_t)(magz_raw_uT),
 				(int16_t)(accx_raw_mps*1000), (int16_t)(accy_raw_mps*1000), (int16_t)(accz_raw_mps*1000),
 				(float)(t_roll.euler_deg), (float)(t_pitch.euler_deg), (float)(t_yaw.euler_deg),
