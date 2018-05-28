@@ -72,8 +72,11 @@ osThreadId myTask04MPU9250Handle;
 osThreadId myTask05MS5803Handle;
 osThreadId myTask06BackEndHandle;
 osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
-osSemaphoreId myBinarySem02LED1Handle;
-osSemaphoreId myBinarySem03LED2Handle;
+osSemaphoreId myBinarySem02LED1ONHandle;
+osSemaphoreId myBinarySem03LED2ONHandle;
+osSemaphoreId myBinarySem05LED1PulsateHandle;
+osSemaphoreId myBinarySem06LED2PulsateHandle;
+osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -139,19 +142,34 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(myBinarySem01MPU9250GyroAccCalibrateOffset);
   myBinarySem01MPU9250GyroAccCalibrateOffsetHandle = osSemaphoreCreate(osSemaphore(myBinarySem01MPU9250GyroAccCalibrateOffset), 1);
 
-  /* definition and creation of myBinarySem02LED1 */
-  osSemaphoreDef(myBinarySem02LED1);
-  myBinarySem02LED1Handle = osSemaphoreCreate(osSemaphore(myBinarySem02LED1), 1);
+  /* definition and creation of myBinarySem02LED1ON */
+  osSemaphoreDef(myBinarySem02LED1ON);
+  myBinarySem02LED1ONHandle = osSemaphoreCreate(osSemaphore(myBinarySem02LED1ON), 1);
 
-  /* definition and creation of myBinarySem03LED2 */
-  osSemaphoreDef(myBinarySem03LED2);
-  myBinarySem03LED2Handle = osSemaphoreCreate(osSemaphore(myBinarySem03LED2), 1);
+  /* definition and creation of myBinarySem03LED2ON */
+  osSemaphoreDef(myBinarySem03LED2ON);
+  myBinarySem03LED2ONHandle = osSemaphoreCreate(osSemaphore(myBinarySem03LED2ON), 1);
+
+  /* definition and creation of myBinarySem05LED1Pulsate */
+  osSemaphoreDef(myBinarySem05LED1Pulsate);
+  myBinarySem05LED1PulsateHandle = osSemaphoreCreate(osSemaphore(myBinarySem05LED1Pulsate), 1);
+
+  /* definition and creation of myBinarySem06LED2Pulsate */
+  osSemaphoreDef(myBinarySem06LED2Pulsate);
+  myBinarySem06LED2PulsateHandle = osSemaphoreCreate(osSemaphore(myBinarySem06LED2Pulsate), 1);
+
+  /* definition and creation of myBinarySem04MPU9250MagCalibrate */
+  osSemaphoreDef(myBinarySem04MPU9250MagCalibrate);
+  myBinarySem04MPU9250MagCalibrateHandle = osSemaphoreCreate(osSemaphore(myBinarySem04MPU9250MagCalibrate), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   osSemaphoreWait(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle,0);
-  osSemaphoreWait(myBinarySem02LED1Handle,0);
-  osSemaphoreWait(myBinarySem03LED2Handle,0);
+  osSemaphoreWait(myBinarySem02LED1ONHandle,0);
+  osSemaphoreWait(myBinarySem03LED2ONHandle,0);
+  osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0);
+  osSemaphoreWait(myBinarySem05LED1PulsateHandle,0);
+  osSemaphoreWait(myBinarySem05LED1PulsateHandle,0);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */

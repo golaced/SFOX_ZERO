@@ -2,22 +2,34 @@
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 
-extern osSemaphoreId myBinarySem02LED1Handle;
-extern osSemaphoreId myBinarySem03LED2Handle;
+extern osSemaphoreId myBinarySem02LED1ONHandle;
+extern osSemaphoreId myBinarySem03LED2ONHandle;
+extern osSemaphoreId myBinarySem05LED1PulsateHandle;
+extern osSemaphoreId myBinarySem06LED2PulsateHandle;
 
 void app_led_thread(void)
 {
-  if(osOK == osSemaphoreWait(myBinarySem02LED1Handle,0))
+  if(osOK == osSemaphoreWait(myBinarySem02LED1ONHandle,0))
   {
     led_one_on();
-    osDelay(1000);
-    return;
+    osDelay(3000);
+    led_one_off();
+    //return;
   }
-  if(osOK == osSemaphoreWait(myBinarySem03LED2Handle,0))
+  if(osOK == osSemaphoreWait(myBinarySem03LED2ONHandle,0))
   {
     led_two_on();
-    osDelay(1000);
-    return;
+    osDelay(3000);
+    led_two_off();
+    //return;
+  }
+  if(osOK == osSemaphoreWait(myBinarySem05LED1PulsateHandle,0))
+  {
+    led_one_toggle();
+  }
+  if(osOK == osSemaphoreWait(myBinarySem06LED2PulsateHandle,0))
+  {
+    
   }
   led_one_toggle();
   osDelay(700);

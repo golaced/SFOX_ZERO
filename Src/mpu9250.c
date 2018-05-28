@@ -11,17 +11,25 @@
 #define CALIBRATING_GYRO_CYCLES             2048
 
 extern osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
-extern osSemaphoreId myBinarySem02LED1Handle;
+extern osSemaphoreId myBinarySem02LED1ONHandle;
+extern osSemaphoreId myBinarySem03LED2ONHandle;
+extern osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
 
 SPI_HandleTypeDef *MPU9250_Handler;
 char mpu_data_ok;
-uint8_t MPU9250_data_buffer[28];//9250Ô­Ê¼Êý¾Ý
+uint8_t MPU9250_data_buffer[28];//9250Ô­Ê¼ï¿½ï¿½ï¿½ï¿½
 
 float accx_raw_mps, accy_raw_mps, accz_raw_mps;
 float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
 float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
 float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
 float magx_raw_uT, magy_raw_uT, magz_raw_uT;
+
+float magx_offset,magy_offset,magz_offset;
+float magx_gain = 1;
+float magy_gain = 1;
+float magz_gain = 1;
+
 //float accx, accy, accz;
 //float gyrox, gyroy, gyroz;
 //float magx, magy, magz;
@@ -217,11 +225,11 @@ uint8_t MPU9250_Check(void) {
 		return ERROR;
 	}
 	simpdelay();
-	MPU9250_Mag_WriteReg(AK8963_CNTL1, 0x16);       // Á¬Ðø²âÁ¿Ä£Ê½2
+	MPU9250_Mag_WriteReg(AK8963_CNTL1, 0x16);       // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½2
 	simpdelay();
-	MPU9250_WriteReg(MPU6500_I2C_SLV4_CTRL, 0x09); //¹Ø±Õslv4,ÍÓÂÝÒÇ¼ÓËÙ¶È¼Æodr=1000,ÑÓ³Ù9¸öÖÜÆÚ,´ÅÁ¦¼Æ50Hz(´ÅÁ¦¼ÆODR=8Hz)
+	MPU9250_WriteReg(MPU6500_I2C_SLV4_CTRL, 0x09); //ï¿½Ø±ï¿½slv4,ï¿½ï¿½ï¿½ï¿½ï¿½Ç¼ï¿½ï¿½Ù¶È¼ï¿½odr=1000,ï¿½Ó³ï¿½9ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½50Hz(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ODR=8Hz)
 	simpdelay();
-	MPU9250_WriteReg(MPU6500_I2C_MST_DELAY_CTRL, 0x81); //¿ªÆôÑÓ³Ù
+	MPU9250_WriteReg(MPU6500_I2C_MST_DELAY_CTRL, 0x81); //ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½
 	simpdelay();
 
 	MPU9250_WriteReg(MPU6500_I2C_MST_CTRL, 0x5D);
@@ -230,7 +238,7 @@ uint8_t MPU9250_Check(void) {
 	simpdelay();
 	MPU9250_WriteReg(MPU6500_I2C_SLV0_REG, AK8963_ST1);
 	simpdelay();
-	MPU9250_WriteReg(MPU6500_I2C_SLV0_CTRL, MPU6500_I2C_SLVx_EN | 8);//´Óst1¿ªÊ¼¶Á8¸ö×Ö½Ú,ÖÐ¼äÁù¸öÎª´Å³¡Êý¾Ý,×îºóÊÇst2
+	MPU9250_WriteReg(MPU6500_I2C_SLV0_CTRL, MPU6500_I2C_SLVx_EN | 8);//ï¿½ï¿½st1ï¿½ï¿½Ê¼ï¿½ï¿½8ï¿½ï¿½ï¿½Ö½ï¿½,ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Å³ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½st2
 	simpdelay();
 
 	return SUCCESS;
@@ -276,7 +284,7 @@ void MPU9250_data_ready_to_read(void)
     }
  }
 
-void MPU9250_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float accx, float accy, float accz)
+void MPU9250_gyro_acc_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float accx, float accy, float accz)
 {
   static float tempGyro[3];
   static float tempAcc[3];
@@ -295,14 +303,20 @@ void MPU9250_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float 
           tempAcc[2]=0;
           gyrox_low  = (float)gyrox;
           gyrox_high = (float)gyrox;
-          osSemaphoreRelease(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle);// ÊÍ·ÅÐÅºÅÁ¿
+          
+          gyrox_raw_bias_dps = 0;
+          gyroy_raw_bias_dps = 0;
+          gyroz_raw_bias_dps = 0;
+
+          accx_raw_bias_mps = 0;
+          accy_raw_bias_mps = 0;
+          accz_raw_bias_mps = 0;
+          osSemaphoreRelease(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle);// ï¿½Í·ï¿½ï¿½Åºï¿½ï¿½ï¿½
           return;
   }
   if(cnt_g == CALIBRATING_GYRO_CYCLES)
   {
           cnt_g = 0;
-          //Gyro_CALIBRATED = 0;
-          //reset_flag=64;
 
           gyrox_raw_bias_dps  = tempGyro[0]/(float)CALIBRATING_GYRO_CYCLES;
           gyroy_raw_bias_dps  = tempGyro[1]/(float)CALIBRATING_GYRO_CYCLES;
@@ -334,15 +348,57 @@ void MPU9250_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float 
   }
   cnt_g++;
   
-  gyrox_raw_bias_dps = 0;
-  gyroy_raw_bias_dps = 0;
-  gyroz_raw_bias_dps = 0;
-  
-  accx_raw_bias_mps = 0;
-  accy_raw_bias_mps = 0;
-  accz_raw_bias_mps = 0;
-  
-  osSemaphoreRelease(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle);// ÊÍ·ÅÐÅºÅÁ¿
+  osSemaphoreRelease(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle);//
+}
+
+void MPU9250_mag_calibrate(int stage, float magx, float magy, float magz)
+{
+	static float magx_low  = 0;
+  	static float magx_high = 0;
+
+	static float magy_low  = 0;
+  	static float magy_high = 0;
+
+	static float magz_low  = 0;
+  	static float magz_high = 0;
+
+	static int cnt = 0;
+	if(cnt++ == 0)
+	{
+		magx_offset = 0;
+		magy_offset = 0;
+		magz_offset = 0;
+		magx_gain = 1;
+		magy_gain = 1;
+		magz_gain = 1;
+		return;
+	}
+
+	if(stage == 1)
+	{
+		if(magx_low  > magx)	magx_low  = magx;
+  		if(magx_high < magx)	magx_high = magx;
+
+		if(magy_low  > magy)	magy_low  = magy;
+  		if(magy_high < magy)	magy_high = magy;
+
+		if(magz_low  > magz)	magz_low  = magz;
+  		if(magz_high < magz)	magz_high = magz;
+	}
+	if(stage == 0)
+	{
+		magx_offset = (magx_low + magx_high) * 0.5f;
+		magy_offset = (magy_low + magy_high) * 0.5f;
+		magz_offset = (magz_low + magz_high) * 0.5f;
+
+		magx_gain = 1;
+		magy_gain = (magx_high - magx_low)/(magy_high - magy_low);
+		magz_gain = (magx_high - magx_low)/(magz_high - magz_low);
+
+		flash_save_parameters();
+
+		cnt = 0;
+	}
 }
 
 void MPU9250_data_push(void)
@@ -358,24 +414,47 @@ void MPU9250_data_push(void)
 	gyroz_raw_dps = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[12], MPU9250_data_buffer[13]))*MPU9250G_1000dps - gyroz_raw_bias_dps;
 
 	//NOTE:mag data's order is Y - X - Z
-	magy_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[16], MPU9250_data_buffer[15]))*MPU9250M_4800uT;
-	magx_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[18], MPU9250_data_buffer[17]))*MPU9250M_4800uT;
+	magx_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[16], MPU9250_data_buffer[15]))*MPU9250M_4800uT;
+	magy_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[18], MPU9250_data_buffer[17]))*MPU9250M_4800uT;
 	magz_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[20], MPU9250_data_buffer[19]))*MPU9250M_4800uT;
+
+	magx_raw_uT = magx_gain * (magx_raw_uT - magx_offset);
+	magy_raw_uT = magy_gain * (magy_raw_uT - magy_offset);
+	magz_raw_uT = magz_gain * (magz_raw_uT - magz_offset);
 }
 
 void MPU9250_process(void)
-{
-	if (mpu_data_ok == 1)
-	{
-		mpu_data_ok = 0;
-		MPU9250_data_push();
-	}
-	MPU9250_read_raw_data();
-        if(osOK == osSemaphoreWait(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle,0))
-        {
-                MPU9250_calibrate_offset_func(gyrox_raw_dps,gyroy_raw_dps,gyroz_raw_dps,accx_raw_mps, accy_raw_mps, accz_raw_mps);
-                osSemaphoreRelease(myBinarySem02LED1Handle);// ÊÍ·ÅÐÅºÅÁ¿LED1
-        }
+{       
+  static int MPU9250MagCalibrateStart = 0;
+  if (mpu_data_ok == 1)
+  {
+    mpu_data_ok = 0;
+    MPU9250_data_push();
+  }
+  MPU9250_read_raw_data();
+  if(osOK == osSemaphoreWait(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle,0))
+  {
+    MPU9250_gyro_acc_calibrate_offset_func(gyrox_raw_dps,gyroy_raw_dps,gyroz_raw_dps,accx_raw_mps, accy_raw_mps, accz_raw_mps);
+    osSemaphoreRelease(myBinarySem02LED1ONHandle);// 
+  }
+  if(MPU9250MagCalibrateStart==0)
+  {
+    if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
+    {
+      MPU9250MagCalibrateStart = 1;
+      osSemaphoreRelease(myBinarySem03LED2ONHandle);// 
+    }
+  }
+  if(MPU9250MagCalibrateStart==1)
+  {
+    MPU9250_mag_calibrate(MPU9250MagCalibrateStart, magx_raw_uT,magy_raw_uT,magz_raw_uT);
+    if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
+    {
+      MPU9250MagCalibrateStart = 0;
+      osSemaphoreRelease(myBinarySem02LED1ONHandle);// 
+      MPU9250_mag_calibrate(MPU9250MagCalibrateStart, magx_raw_uT,magy_raw_uT,magz_raw_uT);
+    }
+  }
 }
 
 

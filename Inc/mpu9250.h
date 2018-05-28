@@ -169,7 +169,7 @@ extern SPI_HandleTypeDef hspi3;
 
 extern SPI_HandleTypeDef *MPU9250_Handler;
 extern char mpu_data_ok;
-extern uint8_t MPU9250_data_buffer[28];//9250原始数据
+extern uint8_t MPU9250_data_buffer[28];//9250原始锟斤拷锟斤拷
 
 extern float accx_raw_mps, accy_raw_mps, accz_raw_mps;
 extern float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
@@ -179,6 +179,8 @@ extern float magx_raw_uT, magy_raw_uT, magz_raw_uT;
 extern float accx, accy, accz;
 extern float gyrox, gyroy, gyroz;
 extern float magx, magy, magz;
+extern float magx_offset,magy_offset,magz_offset;
+extern float magx_gain,magy_gain,magz_gain;
 extern int MPU9250_ERROR;
 
 uint8_t MPU9250_ReadReg(uint8_t ReadAddr);
@@ -193,7 +195,8 @@ uint8_t MPU9250_Check(void);
 void MPU9250_read_raw_data(void);
 void MPU9250_data_ready_to_read(void);
 void MPU9250_data_push(void);
-void MPU9250_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float accx, float accy, float accz);
+void MPU9250_gyro_acc_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float accx, float accy, float accz);
+void MPU9250_mag_calibrate(int stage, float magx, float magy, float magz);
 void MPU9250_process(void);
 
 

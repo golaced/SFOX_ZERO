@@ -8,6 +8,7 @@
 #include "app_ins.h"
 #include <stdlib.h>
 #include "cmsis_os.h"
+#include "uwb1000.h"
 
 #define BYTE0(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 0) )
 #define BYTE1(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 1) )
@@ -18,9 +19,10 @@
 #define RAD_TO_DEG 57.29577951308232087679f
 
 extern osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
+extern osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
 
-static uint8_t ano_data_to_send[100];	//·¢ËÍÊý¾Ý»º´æ
-static uint8_t RxBuffer[50];		//½ÓÊÕÊý¾Ý»º´æ
+static uint8_t ano_data_to_send[100];	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý»ï¿½ï¿½ï¿½
+static uint8_t RxBuffer[50];		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý»ï¿½ï¿½ï¿½
 
 static int state;
 static int _data_len, _data_cnt;
@@ -85,12 +87,12 @@ int ANO_sending(int mode)
 {
 	if (mode == 0)
 	{
-		if ((get_data_from_ANO == 0) && (send_pid_para == 0))//±ÜÃâÊý¾Ý·¢ËÍ³åÍ»
+		if ((get_data_from_ANO == 0) && (send_pid_para == 0))//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý·ï¿½ï¿½Í³ï¿½Í»
 		{
 			ANO_send_15_data(
-				(int16_t)(RC_PWM[0]), (int16_t)(RC_PWM[1]), (int16_t)(RC_PWM[2]),
-				(int16_t)(RC_PWM[3]), (int16_t)(RC_PWM[4]), (int16_t)(RC_PWM[5]),
-				(int16_t)(RC_PWM[6]), (int16_t)(RC_PWM[7]), (int16_t)(9),
+				(int16_t)(anchor[1].distance_mm), (int16_t)(anchor[3].distance_mm), (int16_t)(RC_PWM[2]),
+				(int16_t)(magx_raw_uT), (int16_t)(magy_raw_uT), (int16_t)(magz_raw_uT),
+				(int16_t)(accx_raw_mps*1000), (int16_t)(accy_raw_mps*1000), (int16_t)(accz_raw_mps*1000),
 				(float)(t_roll.euler_deg), (float)(t_pitch.euler_deg), (float)(t_yaw.euler_deg),
 				(int32_t)(15), (uint8_t)(13), (uint8_t)(14));
 		}
@@ -341,7 +343,7 @@ void data_trans_with_ano()
 
 void ANO_data_receive_prepara(uint8_t data)
 {
-        get_data_from_ANO = -1;
+        //get_data_from_ANO = -1;
 	if (state == 0 && data == 0xAA)
 	{
 		state = 1;
@@ -386,61 +388,62 @@ void ANO_DT_Data_Receive_Anl(uint8_t *data_buf, uint8_t num)
 	uint8_t sum = 0;
 	for (uint8_t i = 0; i<(num - 1); i++)
 		sum += *(data_buf + i);
-	//ÅÐ¶Ïsum
+	//ï¿½Ð¶ï¿½sum
 	if (!(sum == *(data_buf + num - 1)))
 	{
 		return;
 	}
-	//ÅÐ¶ÏÖ¡Í·
+	//ï¿½Ð¶ï¿½Ö¡Í·
 	if (!(*(data_buf) == 0xAA && *(data_buf + 1) == 0xAF))
 	{
 		return;
 	}
-	/*------´«¸ÐÆ÷Ð£×¼------*/
+	/*------ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£×¼------*/
 	if (*(data_buf + 2) == 0X01)
 	{
 		if (*(data_buf + 4) == 0X01)
 		{
-			//¼ÓËÙ¶ÈÐ£×¼
+			//ï¿½ï¿½ï¿½Ù¶ï¿½Ð£×¼
 			asm("nop");
 //			task_imu_calibration.acc_calibrate = 1;
 		}
 		if (*(data_buf + 4) == 0X02)
 		{
-			//ÍÓÂÝÒÇÐ£×¼
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£×¼
 			asm("nop");
-                        osSemaphoreRelease(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle);// ÊÍ·ÅÐÅºÅÁ¿
+                        osSemaphoreRelease(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle);// ï¿½Í·ï¿½ï¿½Åºï¿½ï¿½ï¿½
 //			task_imu_calibration.gyro_calibrate = 1;
 		}
 		if (*(data_buf + 4) == 0X05)
 		{
-			//ÆøÑ¹¼ÆÐ£×¼
+			//ï¿½ï¿½Ñ¹ï¿½ï¿½Ð£×¼
 			asm("nop");
 		}
 		if (*(data_buf + 4) == 0X04)
 		{
-			//ÂÞÅÌÐ£×¼
+			//ï¿½ï¿½ï¿½ï¿½Ð£×¼
 			asm("nop");
+                        osSemaphoreRelease(myBinarySem04MPU9250MagCalibrateHandle);// ï¿½Í·ï¿½ï¿½Åºï¿½ï¿½ï¿½
 //			task_imu_calibration.mag_calibrate++;
 		}
 	}
 	if (*(data_buf + 2) == 0X02)
 	{
-		//·µ»Ø²ÎÊý
+		//ï¿½ï¿½ï¿½Ø²ï¿½ï¿½ï¿½
 		if (*(data_buf + 4) == 0X01)
 		{
-			//¶ÁÈ¡·É¿Ø
+			//ï¿½ï¿½È¡ï¿½É¿ï¿½
 			read_data_from_inner_flash = 1;
 			send_pid_para = 1;
 		}
 		if (*(data_buf + 4) == 0XA1)
 		{
-			//»Ö¸´Ä¬ÈÏÖµ
+			//ï¿½Ö¸ï¿½Ä¬ï¿½ï¿½Öµ
 			write_data_to_inner_flash = 1;
 			//asm("nop");
 		}
 	}
-	/******************Ð´Èë·É¿Ø**********************/
+	/******************Ð´ï¿½ï¿½É¿ï¿½**********************/
 	//PID1
 	if (*(data_buf + 2) == 0X10)
 	{

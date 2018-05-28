@@ -8,6 +8,8 @@ struct T_axis{
   float gyro_fir[1];
   float acc_raw[DATA_LEN];
   float acc_fir[1];
+  float mag_raw[DATA_LEN];
+  float mag_fir[1];
   float euler_deg;
   float euler_rad;
 };
@@ -29,7 +31,7 @@ extern struct T_axis t_pitch, t_roll, t_yaw;
 
 extern void app_ins_thread(float dT);
 void obtain_imu_data(void);
-void ins_update(float halfT, float gx, float gy, float gz, float ax, float ay, float az);
+void ins_update(float dT, float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
 
 void data_shift_1(float* ddd,int len);
 void filter_fir(float* in, float* out,float* c,int len);
