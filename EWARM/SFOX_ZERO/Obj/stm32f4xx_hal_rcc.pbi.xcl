@@ -47,8 +47,8 @@ D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CMSIS\Core\Include
 -I
 D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include
 -D__CHAR_BITS__=8
--D__CHAR_MAX__=0xff
--D__CHAR_MIN__=0
+-D__CHAR_MAX__=127
+-D__CHAR_MIN__=(-__CHAR_MAX__-1)
 -D__CHAR_SIZE__=1
 -D__UNSIGNED_CHAR_MAX__=0xff
 -D__SIGNED_CHAR_MAX__=127
@@ -274,6 +274,7 @@ D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include
 -D__IAR_COMPILERBASE__=655877
 -D__IAR_COMPILERBASE_STR__=10.2.5.200
 -D__UNICODE_SOURCE_SUPPORTED__=1
+-D__SIGNED_CHARS__=1
 -D__STDC__=1
 -D__STDC_VERSION__=201112L
 -D__STDC_NO_VLA__=1
@@ -316,6 +317,7 @@ D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CMSIS\DSP\Include
 -D__EDG_FLOAT128_ENABLING_POSSIBLE=0
 -DUSE_HAL_DRIVER=1
 -DSTM32F407xx=1
+-DARM_MATH_CM4=1
 -D_DLIB_CONFIG_FILE_HEADER_NAME="D:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.0\\arm\\INC\\c\\DLib_Config_Full.h"
 -D_DLIB_CONFIG_FILE_STRING="D:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.0\\arm\\INC\\c\\DLib_Config_Full.h"
 -D__VERSION__="IAR ANSI C/C++ Compiler V8.22.1.15669/W32 for ARM"

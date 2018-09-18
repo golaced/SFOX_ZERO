@@ -202,7 +202,7 @@ void MX_FREERTOS_Init(void) {
   myTask05MS5803Handle = osThreadCreate(osThread(myTask05MS5803), NULL);
 
   /* definition and creation of myTask06BackEnd */
-  osThreadDef(myTask06BackEnd, StartTask06BackEnd, osPriorityIdle, 0, 128);
+  osThreadDef(myTask06BackEnd, StartTask06BackEnd, osPriorityIdle, 0, 1024);
   myTask06BackEndHandle = osThreadCreate(osThread(myTask06BackEnd), NULL);
 
   /* definition and creation of myTask07UWB */
@@ -305,7 +305,7 @@ void StartTask06BackEnd(void const * argument)
     app_ctrl_thread(det_t_s.det_t_app_backend_s);
     time_consume[app_backend_time_index][1] = get_sys_time_us();
     app_backend_time_consume_us = time_consume[app_backend_time_index][1] - time_consume[app_backend_time_index][0];
-    osDelay(50);
+    osDelay(10);
   }
   /* USER CODE END StartTask06BackEnd */
 }

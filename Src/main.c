@@ -134,7 +134,7 @@ int main(void)
   RC_PWM_init();
   //电调校准
   motor_esc_init();
-  //MPU9250初始化
+  //MPU9250初始�?
   MPU9250_Init(&hspi1);
   //气压计初始化
   MS5803_Init(&hspi2);

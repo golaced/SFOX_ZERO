@@ -34,18 +34,17 @@ MatDataType ekf_sigmas_gyro_bias_rps = 0.01;
 MatDataType ekf_sigmas_accel_bias_mps2 = 0.1;
 
 MatDataType ekf_sigmas_quad_process_noise = 0.001;
-MatDataType ekf_sigmas_pos_process_noise_m = 0.1;
-MatDataType ekf_sigmas_vel_process_noise_mps = 0.1;
-MatDataType ekf_sigmas_gyroBias_process_noise_rps = 1e-5;
-MatDataType ekf_sigmas_accelBias_process_noise_mps2 = 1e-5;
+MatDataType ekf_sigmas_pos_process_noise_m = 0;
+MatDataType ekf_sigmas_vel_process_noise_mps = 2;
+MatDataType ekf_sigmas_gyroBias_process_noise_rps = 1e-6;
+MatDataType ekf_sigmas_accelBias_process_noise_mps2 = 1e-6;
 
 MatDataType ekf_sigmas_mag3D_unitVector_meas = 1.0f;
-MatDataType ekf_sigmas_pos_meas_m = 2.0f;
+MatDataType ekf_sigmas_pos_meas_m = 1.0f;
 
 Mat ekf_xhat;
-Mat ekf_Q;
 Mat ekf_P;
-Mat ekf_R;
+
 
 int app_ins_ekf_quaternion_thread(float dt_s)
 {
@@ -99,23 +98,26 @@ int ekf_basedon_quaternion(float dt_s,
                                       ekf_sigmas_gyro_bias_rps, ekf_sigmas_gyro_bias_rps, ekf_sigmas_gyro_bias_rps,
                                       ekf_sigmas_accel_bias_mps2, ekf_sigmas_accel_bias_mps2, ekf_sigmas_accel_bias_mps2};
         MatDiag(&ekf_P, ekf_P_init, 16);
-        //Q矩阵初始化
-        MatCreate(&ekf_Q, 16, 16);
-        MatDataType ekf_Q_init[16] = {ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise,
-                                      ekf_sigmas_pos_process_noise_m, ekf_sigmas_pos_process_noise_m, ekf_sigmas_pos_process_noise_m,
-                                      ekf_sigmas_vel_process_noise_mps, ekf_sigmas_vel_process_noise_mps, ekf_sigmas_vel_process_noise_mps,
-                                      ekf_sigmas_gyroBias_process_noise_rps, ekf_sigmas_gyroBias_process_noise_rps, ekf_sigmas_gyroBias_process_noise_rps,
-                                      ekf_sigmas_accelBias_process_noise_mps2, ekf_sigmas_accelBias_process_noise_mps2, ekf_sigmas_accelBias_process_noise_mps2};
-        MatDiag(&ekf_Q, ekf_Q_init, 16);
-        //R矩阵初始化
-        MatCreate(&ekf_R, 6, 6);
-        MatDataType ekf_R_init[6] = {
-            ekf_sigmas_mag3D_unitVector_meas, ekf_sigmas_mag3D_unitVector_meas, ekf_sigmas_mag3D_unitVector_meas,
-            ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m};
-        MatDiag(&ekf_R, ekf_R_init, 6);
+
         RunOnce = 1;
     }
-
+    Mat ekf_Q;
+    Mat ekf_R;
+    //Q矩阵初始化
+    MatCreate(&ekf_Q, 16, 16);
+    MatDataType ekf_Q_init[16] = {ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise,
+                                  ekf_sigmas_pos_process_noise_m, ekf_sigmas_pos_process_noise_m, ekf_sigmas_pos_process_noise_m,
+                                  ekf_sigmas_vel_process_noise_mps, ekf_sigmas_vel_process_noise_mps, ekf_sigmas_vel_process_noise_mps,
+                                  ekf_sigmas_gyroBias_process_noise_rps, ekf_sigmas_gyroBias_process_noise_rps, ekf_sigmas_gyroBias_process_noise_rps,
+                                  ekf_sigmas_accelBias_process_noise_mps2, ekf_sigmas_accelBias_process_noise_mps2, ekf_sigmas_accelBias_process_noise_mps2};
+    MatDiag(&ekf_Q, ekf_Q_init, 16);
+    //R矩阵初始化
+    MatCreate(&ekf_R, 6, 6);
+    MatDataType ekf_R_init[6] = {
+        ekf_sigmas_mag3D_unitVector_meas, ekf_sigmas_mag3D_unitVector_meas, ekf_sigmas_mag3D_unitVector_meas,
+        ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m};
+    MatDiag(&ekf_R, ekf_R_init, 6);
+        
     MatDataType q0, q1, q2, q3;
     MatDataType Vn, Ve, Vd;
     MatDataType bwx, bwy, bwz;
@@ -377,6 +379,8 @@ int ekf_basedon_quaternion(float dt_s,
     yaw_deg = 180 / PI * atan2(2*(q1*q2 + q3*q0), 1-2*(q2*q2 + q3*q3)); // -180 <= yaw <= 180
 
     //回收变量
+    MatDelete(&ekf_Q);
+    MatDelete(&ekf_R);
     MatDelete(&Wxyz);
     MatDelete(&Fxyz);
     MatDelete(&Xdot_part1_aux1);
@@ -419,6 +423,10 @@ int ekf_basedon_quaternion(float dt_s,
     MatDelete(&ekf_K_aux3);
     MatDelete(&ekf_K_aux4);
     MatDelete(&ekf_K_aux5);
+    MatDelete(&ekf_Z);
+    MatDelete(&ekf_xhat_aux1);
+    MatDelete(&ekf_xhat_aux2);
+    MatDelete(&ekf_xhat_aux3);
     MatDelete(&P_EYE16);
     MatDelete(&ekf_Pe_aux1);
     MatDelete(&ekf_Pe_aux2);

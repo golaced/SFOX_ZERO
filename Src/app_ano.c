@@ -98,7 +98,7 @@ int ANO_sending(int mode)
 				// (int16_t)(temp1*100), (int16_t)(temp2*100), (int16_t)(temp3*100),
 				// (int16_t)(temp4*100), (int16_t)(temp5*100), (int16_t)(temp6*100),
 				// (int16_t)(magx_raw_uT), (int16_t)(magy_raw_uT), (int16_t)(temp0),
-				(float)(roll_deg), (float)(pitch_deg), (float)(yaw_deg),
+				(float)(roll_deg), (float)(pitch_deg), (float)(0),
 				(int32_t)(15), (uint8_t)(13), (uint8_t)(14));
 		}
 	}
