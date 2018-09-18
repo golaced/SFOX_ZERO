@@ -52,6 +52,9 @@ void RC_PWM_init(void)
 	 HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_2);
 	 HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_3);
 	 HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
+
+	//ç©ºä½™æ—¶é—´ï¼Œæ•èŽ·é¥æŽ§å™¨é€šé“
+  	HAL_Delay(500);
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
@@ -61,23 +64,23 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		//
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_9) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer1_channel1_PE9_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1);
 			}
 			else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer1_channel1_PE9_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer1_channel1_PE9_IC1Value2 > timer1_channel1_PE9_IC1Value1)
 				{
 					timer1_channel1_PE9_DiffCapture = timer1_channel1_PE9_IC1Value2 - timer1_channel1_PE9_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer1_channel1_PE9_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim1) -timer1_channel1_PE9_IC1Value1 + 1) + timer1_channel1_PE9_IC1Value2;
 				}
 				RC_PWM[7] = (int)(timer1_channel1_PE9_DiffCapture * 0.25f);
@@ -86,23 +89,23 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		//
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_11) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer1_channel2_PE11_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_2);
 			}
 			else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer1_channel2_PE11_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_2);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer1_channel2_PE11_IC1Value2 > timer1_channel2_PE11_IC1Value1)
 				{
 					timer1_channel2_PE11_DiffCapture = timer1_channel2_PE11_IC1Value2 - timer1_channel2_PE11_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer1_channel2_PE11_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim1) -timer1_channel2_PE11_IC1Value1 + 1) + timer1_channel2_PE11_IC1Value2;
 				}
 				RC_PWM[6] = (int)(timer1_channel2_PE11_DiffCapture * 0.25f);
@@ -111,23 +114,23 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		//
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_13) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer1_channel3_PE13_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_3);
 			}
 			else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer1_channel3_PE13_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_3);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer1_channel3_PE13_IC1Value2 > timer1_channel3_PE13_IC1Value1)
 				{
 					timer1_channel3_PE13_DiffCapture = timer1_channel3_PE13_IC1Value2 - timer1_channel3_PE13_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer1_channel3_PE13_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim1) -timer1_channel3_PE13_IC1Value1 + 1) + timer1_channel3_PE13_IC1Value2;
 				}
 				RC_PWM[5] = (int)(timer1_channel3_PE13_DiffCapture * 0.25f);
@@ -136,23 +139,23 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		//
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_14) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer1_channel4_PE14_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_4);
 			}
 			else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer1_channel4_PE14_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_4);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer1_channel4_PE14_IC1Value2 > timer1_channel4_PE14_IC1Value1)
 				{
 					timer1_channel4_PE14_DiffCapture = timer1_channel4_PE14_IC1Value2 - timer1_channel4_PE14_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer1_channel4_PE14_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim1) -timer1_channel4_PE14_IC1Value1 + 1) + timer1_channel4_PE14_IC1Value2;
 				}
 				RC_PWM[4] = (int)(timer1_channel4_PE14_DiffCapture * 0.25f);
@@ -165,23 +168,23 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	{
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_5) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer2_channel1_PA5_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
 			}
 			else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer2_channel1_PA5_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer2_channel1_PA5_IC1Value2 > timer2_channel1_PA5_IC1Value1)
 				{
 					timer2_channel1_PA5_DiffCapture = timer2_channel1_PA5_IC1Value2 - timer2_channel1_PA5_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer2_channel1_PA5_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim2) -timer2_channel1_PA5_IC1Value1 + 1) + timer2_channel1_PA5_IC1Value2;
 				}
 				RC_PWM[3] = (int)(timer2_channel1_PA5_DiffCapture * 0.25f);
@@ -190,23 +193,23 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		//
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer2_channel2_PA1_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
 			}
 			else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer2_channel2_PA1_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer2_channel2_PA1_IC1Value2 > timer2_channel2_PA1_IC1Value1)
 				{
 					timer2_channel2_PA1_DiffCapture = timer2_channel2_PA1_IC1Value2 - timer2_channel2_PA1_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer2_channel2_PA1_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim2) -timer2_channel2_PA1_IC1Value1 + 1) + timer2_channel2_PA1_IC1Value2;
 				}
 				RC_PWM[2] = (int)(timer2_channel2_PA1_DiffCapture * 0.25f);
@@ -215,22 +218,22 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		//
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_10) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer2_channel3_PB10_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_3);
 			}else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer2_channel3_PB10_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_3);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer2_channel3_PB10_IC1Value2 > timer2_channel3_PB10_IC1Value1)
 				{
 					timer2_channel3_PB10_DiffCapture = timer2_channel3_PB10_IC1Value2 - timer2_channel3_PB10_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer2_channel3_PB10_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim2) -timer2_channel3_PB10_IC1Value1 + 1) + timer2_channel3_PB10_IC1Value2;
 				}
 				RC_PWM[1] = (int)(timer2_channel3_PB10_DiffCapture * 0.25f);
@@ -239,23 +242,23 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		//
 		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
 		{
-			//¶ÁÈ¡´ËÊ±IO¿ÚµÄµçÆ½,Îª¸ß,ÔòÕâ´ÎµÄ²¶»ñÊÇÉÏÉýÑØ
+			//ï¿½ï¿½È¡ï¿½ï¿½Ê±IOï¿½ÚµÄµï¿½Æ½,Îªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_11) == GPIO_PIN_SET)
 			{
 				/* Get the 1st Input Capture value */
 				timer2_channel4_PB11_IC1Value1 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_4);
 			}
 			else
-			{  //ÏÂ½µÑØ
+			{  //ï¿½Â½ï¿½ï¿½ï¿½
 				/* Get the 2st Input Capture value */
 				timer2_channel4_PB11_IC1Value2 = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_4);
-								//2´óÓÚ1,ËµÃ÷ÔÚÍ¬Ò»¸ö¼ÆÊýÖÜÆÚÄÚ,Ö±½Ó¼õ
+								//2ï¿½ï¿½ï¿½ï¿½1,Ëµï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½Ó¼ï¿½
 				if(timer2_channel4_PB11_IC1Value2 > timer2_channel4_PB11_IC1Value1)
 				{
 					timer2_channel4_PB11_DiffCapture = timer2_channel4_PB11_IC1Value2 - timer2_channel4_PB11_IC1Value1;
 				}
 				else
-				{ //2Ð¡ÓÚ1,²»ÔÚÒ»¸ö¼ÆÊýÖÜÆÚÄÚ,ÓÃÖÜÆÚ¼õ1µÄ¼ÆÊý,ÔÙ¼õÈ¥2,µÃ³öÕæÊµÂö¿í
+				{ //2Ð¡ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½1ï¿½Ä¼ï¿½ï¿½ï¿½,ï¿½Ù¼ï¿½È¥2,ï¿½Ã³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½
 					timer2_channel4_PB11_DiffCapture = (__HAL_TIM_GET_AUTORELOAD(&htim2) -timer2_channel4_PB11_IC1Value1 + 1) + timer2_channel4_PB11_IC1Value2;
 				}
 				RC_PWM[0] = (int)(timer2_channel4_PB11_DiffCapture * 0.25f);

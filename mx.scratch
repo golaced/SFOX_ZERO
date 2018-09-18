@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>I:\DEVELOPE\LAN\CODE\SFOX_ZERO\SFOX_ZERO\\SFOX_ZERO</ProjectName>
+<ProjectName>J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\\SFOX_ZERO</ProjectName>
 <ProjectNature>C</ProjectNature> 
 <CMSIS>..\Drivers\CMSIS</CMSIS>
 <HAL_Driver>C:\Users\tsuig\STM32Cube\Repository\STM32Cube_FW_F4_V1.21.0\Drivers\CMSIS</HAL_Driver>

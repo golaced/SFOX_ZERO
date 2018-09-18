@@ -4,16 +4,17 @@
 volatile unsigned long long sysTickUptime;
 float cycle_T[20][3];
 unsigned long long time_consume[GET_TIME_NUM][2];
-int app_ano_time_comsume_us;
-int app_backend_time_comsume_us;
-int mpu9250_time_comsume_us;
+int app_ano_time_consume_us;
+int app_backend_time_consume_us;
+int mpu9250_time_consume_us;
+int app_uwb_time_consume_us;
 Det_t det_t_s;
 
 float get_cycle_time(int item)
 {
-  cycle_T[item][OLD] = cycle_T[item][NOW];	//上一次的时间
-  cycle_T[item][NOW] = get_sys_time_us()/1000000.0f; //本次的时间
-  cycle_T[item][NEW] = ( ( cycle_T[item][NOW] - cycle_T[item][OLD] ) );//间隔的时间（周期）
+  cycle_T[item][OLD] = cycle_T[item][NOW];	//锟斤拷一锟轿碉拷时锟斤拷
+  cycle_T[item][NOW] = get_sys_time_us()/1000000.0f; //锟斤拷锟轿碉拷时锟斤拷
+  cycle_T[item][NEW] = ( ( cycle_T[item][NOW] - cycle_T[item][OLD] ) );//锟斤拷锟斤拷时锟戒（锟斤拷锟节ｏ拷
   return cycle_T[item][NEW];
 }
 

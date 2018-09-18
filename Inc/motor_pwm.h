@@ -3,22 +3,26 @@
 
 #include "stm32f4xx_hal.h"
 
-//400Hz   Couter Period:2500¼ÆÊý ÖÜÆÚ 0.0025ms
-//¼´Ã¿¼ÆÊýÔö¼Ó1£¬·½²¨ÑÓ³¤1/1000ºÁÃë
-//ÆÕÍ¨µ¥Ïòµçµ÷:·½²¨Âö³å£¬µçµ÷1msÍ£×ª£¬2msÂúÓÍÃÅÔË×ª
-//Òò´ËÊä³öÏÞÖÆ£º×îÐ¡1000£¬×î´ó2000
-#define PWM_MIN_OUT 1000
-#define PWM_MAX_OUT 2000
+//400Hz   Couter Period:2500ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 0.0025ms
+//ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½1/1000ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½å£¬ï¿½ï¿½ï¿½1msÍ£×ªï¿½ï¿½2msï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ª
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ð¡1000ï¿½ï¿½ï¿½ï¿½ï¿½2000
+// #define PWM_MIN_OUT 1000
+// #define PWM_MAX_OUT 2000
 
-extern uint16_t motor1_output;
-extern uint16_t motor2_output;
-extern uint16_t motor3_output;
-extern uint16_t motor4_output;
+extern int motor1_output;
+extern int motor2_output;
+extern int motor3_output;
+extern int motor4_output;
 
-extern void motor_pwm_set_value(uint16_t motor1, uint16_t motor2, uint16_t motor3, uint16_t motor4);
+extern int motor_esc_init_finish;
+
+extern void motor_pwm_set_value(int motor1, int motor2, int motor3, int motor4);
 
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
+
+extern void motor_esc_init(void);
 
 void timer3_channel1_PA6_PWM_setvalue(uint16_t value);
 void timer3_channel2_PA7_PWM_setvalue(uint16_t value);

@@ -175,13 +175,16 @@ extern float accx_raw_mps, accy_raw_mps, accz_raw_mps;
 extern float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
 extern float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
 extern float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
-extern float magx_raw_uT, magy_raw_uT, magz_raw_uT;
-extern float accx, accy, accz;
-extern float gyrox, gyroy, gyroz;
+extern float magx_raw_uT[110], magy_raw_uT[110], magz_raw_uT[110];
+extern float magx_fir_uT[1],magy_fir_uT[1],magz_fir_uT[1];
+// extern float magx_raw_uT, magy_raw_uT, magz_raw_uT;
+// extern float accx, accy, accz;
+// extern float gyrox, gyroy, gyroz;
 extern float magx, magy, magz;
 extern float magx_offset,magy_offset,magz_offset;
 extern float magx_gain,magy_gain,magz_gain;
 extern int MPU9250_ERROR;
+
 
 uint8_t MPU9250_ReadReg(uint8_t ReadAddr);
 void MPU9250_WriteReg(uint8_t WriteAddr, uint8_t WriteData);
@@ -198,6 +201,5 @@ void MPU9250_data_push(void);
 void MPU9250_gyro_acc_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float accx, float accy, float accz);
 void MPU9250_mag_calibrate(int stage, float magx, float magy, float magz);
 void MPU9250_process(void);
-
 
 #endif

@@ -23,9 +23,9 @@
 
 if ($debugfile -eq "")
 {
-& "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "I:\DEVELOPE\LAN\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.general.xcl" --backend -f "I:\DEVELOPE\LAN\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.driver.xcl" 
+& "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "D:\WORK\DEVO\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.general.xcl" --backend -f "D:\WORK\DEVO\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.driver.xcl" 
 }
 else
 {
-& "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "I:\DEVELOPE\LAN\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.general.xcl" --debug_file=$debugfile --backend -f "I:\DEVELOPE\LAN\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.driver.xcl" 
+& "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "D:\WORK\DEVO\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.general.xcl" --debug_file=$debugfile --backend -f "D:\WORK\DEVO\CODE\SFOX_ZERO\SFOX_ZERO\EWARM\settings\SFOX_ZERO.SFOX_ZERO.driver.xcl" 
 }

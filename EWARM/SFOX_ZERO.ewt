@@ -1204,6 +1204,9 @@
             <file>
                 <name>$PROJ_DIR$\..\Src\app_ros.c</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\..\Src\app_uwb.c</name>
+            </file>
         </group>
         <group>
             <name>EWARM</name>
@@ -1236,6 +1239,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\uwb1000.c</name>
+            </file>
+        </group>
+        <group>
+            <name>MathLib</name>
+            <file>
+                <name>$PROJ_DIR$\..\Src\CMatrix.c</name>
             </file>
         </group>
         <group>

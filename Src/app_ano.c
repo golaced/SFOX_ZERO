@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "cmsis_os.h"
 #include "uwb1000.h"
+#include "app_ros.h"
 
 #define BYTE0(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 0) )
 #define BYTE1(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 1) )
@@ -21,8 +22,8 @@
 extern osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
 extern osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
 
-static uint8_t ano_data_to_send[100];	//�������ݻ���
-static uint8_t RxBuffer[50];		//�������ݻ���
+static uint8_t ano_data_to_send[100];	//
+static uint8_t RxBuffer[50];		//
 
 static int state;
 static int _data_len, _data_cnt;
@@ -87,13 +88,16 @@ int ANO_sending(int mode)
 {
 	if (mode == 0)
 	{
-		if ((get_data_from_ANO == 0) && (send_pid_para == 0))//�������ݷ��ͳ�ͻ
+		if ((get_data_from_ANO == 0) && (send_pid_para == 0))
 		{
 			ANO_send_15_data(
-				(int16_t)(t_pitch.mag_h[0]*100), (int16_t)(t_roll.mag_h[0]*100), (int16_t)(RC_PWM[2]),
-				(int16_t)(magx_raw_uT), (int16_t)(magy_raw_uT), (int16_t)(magz_raw_uT),
-				(int16_t)(accx_raw_mps*1000), (int16_t)(accy_raw_mps*1000), (int16_t)(accz_raw_mps*1000),
-				(float)(t_roll.euler_deg), (float)(t_pitch.euler_deg), (float)(t_yaw.euler_deg),
+				(int16_t)(1000*t_body_x.acc_raw_meter_per_s[0]), (int16_t)(1000*t_body_y.acc_raw_meter_per_s[0]), (int16_t)(1000*t_body_z.acc_raw_meter_per_s[0]),
+				(int16_t)(1000*t_body_x.gyro_raw_rad_per_s[0]), (int16_t)(1000*t_body_y.gyro_raw_rad_per_s[0]), (int16_t)(1000*t_body_z.gyro_raw_rad_per_s[0]),
+				(int16_t)(10*magx_raw_uT[0]), (int16_t)(10*magy_raw_uT[0]), (int16_t)(10*magz_raw_uT[0]),
+				// (int16_t)(temp1*100), (int16_t)(temp2*100), (int16_t)(temp3*100),
+				// (int16_t)(temp4*100), (int16_t)(temp5*100), (int16_t)(temp6*100),
+				// (int16_t)(magx_raw_uT), (int16_t)(magy_raw_uT), (int16_t)(temp0),
+				(float)(1*t_attitude.roll*RAD_TO_DEG), (float)(1*t_attitude.pitch*RAD_TO_DEG), (float)(1*t_attitude.yaw*RAD_TO_DEG),
 				(int32_t)(15), (uint8_t)(13), (uint8_t)(14));
 		}
 	}

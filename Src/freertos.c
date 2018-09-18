@@ -62,6 +62,7 @@
 #include "time.h"
 #include "app_ctrl.h"
 #include "app_ros.h"
+#include "app_uwb.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -71,6 +72,7 @@ osThreadId myTask03COMHandle;
 osThreadId myTask04MPU9250Handle;
 osThreadId myTask05MS5803Handle;
 osThreadId myTask06BackEndHandle;
+osThreadId myTask07UWBHandle;
 osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
 osSemaphoreId myBinarySem02LED1ONHandle;
 osSemaphoreId myBinarySem03LED2ONHandle;
@@ -89,6 +91,7 @@ void StartTask03COM(void const * argument);
 void StartTask04MPU9250(void const * argument);
 void StartTask05MS5803(void const * argument);
 void StartTask06BackEnd(void const * argument);
+void StartTask07UWB(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -201,6 +204,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(myTask06BackEnd, StartTask06BackEnd, osPriorityIdle, 0, 128);
   myTask06BackEndHandle = osThreadCreate(osThread(myTask06BackEnd), NULL);
 
+  /* definition and creation of myTask07UWB */
+  osThreadDef(myTask07UWB, StartTask07UWB, osPriorityIdle, 0, 128);
+  myTask07UWBHandle = osThreadCreate(osThread(myTask07UWB), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -247,7 +254,7 @@ void StartTask03COM(void const * argument)
     ano_process(0);
     app_ros_thread();
     time_consume[app_ano_time_index][1] = get_sys_time_us();
-    app_ano_time_comsume_us = time_consume[app_ano_time_index][1] - time_consume[app_ano_time_index][0];
+    app_ano_time_consume_us = time_consume[app_ano_time_index][1] - time_consume[app_ano_time_index][0];
     osDelay(10);
   }
   /* USER CODE END StartTask03COM */
@@ -264,7 +271,7 @@ void StartTask04MPU9250(void const * argument)
     det_t_s.det_t_mpu9250_s = get_cycle_time(mpu9250_time_index);
     MPU9250_process();
     time_consume[mpu9250_time_index][1] = get_sys_time_us();
-    mpu9250_time_comsume_us = time_consume[mpu9250_time_index][1] - time_consume[mpu9250_time_index][0];
+    mpu9250_time_consume_us = time_consume[mpu9250_time_index][1] - time_consume[mpu9250_time_index][0];
     osDelay(1);
   }
   /* USER CODE END StartTask04MPU9250 */
@@ -295,10 +302,27 @@ void StartTask06BackEnd(void const * argument)
     app_ins_thread(det_t_s.det_t_app_backend_s);
     app_ctrl_thread(det_t_s.det_t_app_backend_s);
     time_consume[app_backend_time_index][1] = get_sys_time_us();
-    app_backend_time_comsume_us = time_consume[app_backend_time_index][1] - time_consume[app_backend_time_index][0];
+    app_backend_time_consume_us = time_consume[app_backend_time_index][1] - time_consume[app_backend_time_index][0];
     osDelay(1);
   }
   /* USER CODE END StartTask06BackEnd */
+}
+
+/* StartTask07UWB function */
+void StartTask07UWB(void const * argument)
+{
+  /* USER CODE BEGIN StartTask07UWB */
+  /* Infinite loop */
+  for(;;)
+  {
+    time_consume[app_uwb_time_index][0] = get_sys_time_us();
+    det_t_s.det_t_app_backend_s = get_cycle_time(app_uwb_time_index);
+    app_uwb_thread();
+    time_consume[app_uwb_time_index][1] = get_sys_time_us();
+    app_uwb_time_consume_us = time_consume[app_uwb_time_index][1] - time_consume[app_uwb_time_index][0];
+    osDelay(50);
+  }
+  /* USER CODE END StartTask07UWB */
 }
 
 /* USER CODE BEGIN Application */

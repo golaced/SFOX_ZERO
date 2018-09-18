@@ -3,11 +3,11 @@
 
 #include "stm32f4xx_hal.h"
 
-extern int32_t ros_a_x, ros_a_y, ros_a_z;
-extern int32_t ros_b_x, ros_b_y, ros_b_z;
-extern int32_t ros_c_x, ros_c_y, ros_c_z;
-extern int32_t ros_d_x, ros_d_y, ros_d_z;
-extern int32_t ros_e_x, ros_e_y, ros_e_z;
+extern float ros_a_x, ros_a_y, ros_a_z;
+extern float ros_b_x, ros_b_y, ros_b_z;
+extern float ros_c_x, ros_c_y, ros_c_z;
+extern float ros_d_x, ros_d_y, ros_d_z;
+extern float ros_e_x, ros_e_y, ros_e_z;
 
 int32_t ros_usart_send_data(uint8_t *dataToSend, uint8_t length);
 

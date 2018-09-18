@@ -9,14 +9,14 @@
 #define BYTE2(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 2) )
 #define BYTE3(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 3) )
 
-int32_t ros_a_x, ros_a_y, ros_a_z;
-int32_t ros_b_x, ros_b_y, ros_b_z;
-int32_t ros_c_x, ros_c_y, ros_c_z;
-int32_t ros_d_x, ros_d_y, ros_d_z;
-int32_t ros_e_x, ros_e_y, ros_e_z;
+float ros_a_x, ros_a_y, ros_a_z;
+float ros_b_x, ros_b_y, ros_b_z;
+float ros_c_x, ros_c_y, ros_c_z;
+float ros_d_x, ros_d_y, ros_d_z;
+float ros_e_x, ros_e_y, ros_e_z;
 
-static uint8_t ros_data_to_send[200];	//·¢ËÍÊý¾Ý»º´æ
-static uint8_t RxBuffer[200];		//½ÓÊÕÊý¾Ý»º´æ
+static uint8_t ros_data_to_send[200];	//
+static uint8_t RxBuffer[200];		//
 
 static int state;
 static int _data_len, _data_cnt;
@@ -25,9 +25,9 @@ static int data_from_ros_updata;
 void ros_sending(void)
 {
   ros_send_15_data(
-  (int32_t)(accx_raw_mps),(int32_t)(accy_raw_mps),(int32_t)(accz_raw_mps),
-  (int32_t)(t_pitch.euler_deg),(int32_t)(t_roll.euler_deg),(int32_t)(t_yaw.euler_deg),
-  (int32_t)(0),(int32_t)(0),(int32_t)(0),
+  (int32_t)(accx_raw_mps*1000),(int32_t)(accy_raw_mps*1000),(int32_t)(accz_raw_mps*1000),
+  (int32_t)(gyrox_raw_dps*1000),(int32_t)(gyroy_raw_dps*1000),(int32_t)(gyroz_raw_dps*1000),
+  (int32_t)(magx),(int32_t)(magy),(int32_t)(magz),
   (int32_t)(anchor[0].distance_mm),(int32_t)(anchor[1].distance_mm),(int32_t)(anchor[2].distance_mm),
   (int32_t)(anchor[3].distance_mm),(int32_t)(anchor[4].distance_mm),(int32_t)(anchor[5].distance_mm));
 }
@@ -105,7 +105,7 @@ void data_trans_with_ros()
 
 int32_t ros_data_receive_analyse(uint8_t *data_buf, uint8_t num)
 {
-  //ÅÐ¶Ïsum
+  //ï¿½Ð¶ï¿½sum
   uint8_t sum = 0;
   for(uint8_t i = 0; i < (num-1);i ++)
   {
@@ -115,33 +115,33 @@ int32_t ros_data_receive_analyse(uint8_t *data_buf, uint8_t num)
   {
           return -1;
   }
-  //ÅÐ¶ÏÖ¡Í·
+  //ï¿½Ð¶ï¿½Ö¡Í·
   if (!(*(data_buf) == 0xBB && *(data_buf + 1) == 0xBB))
   {
           return -1;
   }
-  //½âÎöÊý¾Ý
+  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   if (*(data_buf + 2) == 0X02)
   {
-    ros_a_x = (int32_t)(data_buf[4]<<24 | data_buf[5]<<16 | data_buf[6]<<8 | data_buf[7]);
-    ros_a_y = (int32_t)(data_buf[8]<<24 | data_buf[9]<<16 | data_buf[10]<<8 | data_buf[11]);
-    ros_a_z = (int32_t)(data_buf[12]<<24 | data_buf[13]<<16 | data_buf[14]<<8 | data_buf[15]);
+    ros_a_x = 0.001f*(int32_t)(data_buf[4]<<24 | data_buf[5]<<16 | data_buf[6]<<8 | data_buf[7]);
+    ros_a_y = 0.001f*(int32_t)(data_buf[8]<<24 | data_buf[9]<<16 | data_buf[10]<<8 | data_buf[11]);
+    ros_a_z = 0.001f*(int32_t)(data_buf[12]<<24 | data_buf[13]<<16 | data_buf[14]<<8 | data_buf[15]);
 
-    ros_b_x = (int32_t)(data_buf[16]<<24 | data_buf[17]<<16 | data_buf[18]<<8 | data_buf[19]);
-    ros_b_y = (int32_t)(data_buf[20]<<24 | data_buf[21]<<16 | data_buf[22]<<8 | data_buf[23]);
-    ros_b_z = (int32_t)(data_buf[24]<<24 | data_buf[25]<<16 | data_buf[26]<<8 | data_buf[27]);
+    ros_b_x = 0.001f*(int32_t)(data_buf[16]<<24 | data_buf[17]<<16 | data_buf[18]<<8 | data_buf[19]);
+    ros_b_y = 0.001f*(int32_t)(data_buf[20]<<24 | data_buf[21]<<16 | data_buf[22]<<8 | data_buf[23]);
+    ros_b_z = 0.001f*(int32_t)(data_buf[24]<<24 | data_buf[25]<<16 | data_buf[26]<<8 | data_buf[27]);
 
-    ros_c_x = (int32_t)(data_buf[28]<<24 | data_buf[29]<<16 | data_buf[30]<<8 | data_buf[31]);
-    ros_c_y = (int32_t)(data_buf[32]<<24 | data_buf[33]<<16 | data_buf[34]<<8 | data_buf[35]);
-    ros_c_z = (int32_t)(data_buf[36]<<24 | data_buf[37]<<16 | data_buf[38]<<8 | data_buf[39]);
+    ros_c_x = 0.001f*(int32_t)(data_buf[28]<<24 | data_buf[29]<<16 | data_buf[30]<<8 | data_buf[31]);
+    ros_c_y = 0.001f*(int32_t)(data_buf[32]<<24 | data_buf[33]<<16 | data_buf[34]<<8 | data_buf[35]);
+    ros_c_z = 0.001f*(int32_t)(data_buf[36]<<24 | data_buf[37]<<16 | data_buf[38]<<8 | data_buf[39]);
 
-    ros_d_x = (int32_t)(data_buf[40]<<24 | data_buf[41]<<16 | data_buf[42]<<8 | data_buf[43]);
-    ros_d_y = (int32_t)(data_buf[44]<<24 | data_buf[45]<<16 | data_buf[46]<<8 | data_buf[47]);
-    ros_d_z = (int32_t)(data_buf[48]<<24 | data_buf[49]<<16 | data_buf[50]<<8 | data_buf[51]);
+    ros_d_x = 0.001f*(int32_t)(data_buf[40]<<24 | data_buf[41]<<16 | data_buf[42]<<8 | data_buf[43]);
+    ros_d_y = 0.001f*(int32_t)(data_buf[44]<<24 | data_buf[45]<<16 | data_buf[46]<<8 | data_buf[47]);
+    ros_d_z = 0.001f*(int32_t)(data_buf[48]<<24 | data_buf[49]<<16 | data_buf[50]<<8 | data_buf[51]);
 
-    ros_e_x = (int32_t)(data_buf[52]<<24 | data_buf[53]<<16 | data_buf[54]<<8 | data_buf[55]);
-    ros_e_y = (int32_t)(data_buf[56]<<24 | data_buf[57]<<16 | data_buf[58]<<8 | data_buf[59]);
-    ros_e_z = (int32_t)(data_buf[60]<<24 | data_buf[61]<<16 | data_buf[62]<<8 | data_buf[63]);
+    ros_e_x = 0.001f*(int32_t)(data_buf[52]<<24 | data_buf[53]<<16 | data_buf[54]<<8 | data_buf[55]);
+    ros_e_y = 0.001f*(int32_t)(data_buf[56]<<24 | data_buf[57]<<16 | data_buf[58]<<8 | data_buf[59]);
+    ros_e_z = 0.001f*(int32_t)(data_buf[60]<<24 | data_buf[61]<<16 | data_buf[62]<<8 | data_buf[63]);
 
     return 0;
   }
@@ -258,5 +258,6 @@ void ros_send_15_data(
 int app_ros_thread(void)
 {
   ros_sending();
+  data_trans_with_ros();
   return 0;
 }
