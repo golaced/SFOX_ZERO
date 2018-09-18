@@ -3,13 +3,13 @@
     <StLinkDriver>
         <stlinkserialNo>42102267</stlinkserialNo>
         <stlinkfoundProbes />
-        <stlinkResetStyle>0</stlinkResetStyle>
-        <stlinkResetStrategy>3</stlinkResetStrategy>
         <CStepIntDis>_ 0</CStepIntDis>
         <LeaveTargetRunning>_ 0</LeaveTargetRunning>
+        <stlinkResetStyle>0</stlinkResetStyle>
+        <stlinkResetStrategy>3</stlinkResetStrategy>
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>1898383744</Checksum>
+        <Checksum>1774223379</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -99,6 +99,13 @@
         <ShowTimeSum>1</ShowTimeSum>
         <SumSortOrder>0</SumSortOrder>
     </EventLog>
+    <DisassembleMode>
+        <mode>0</mode>
+    </DisassembleMode>
+    <Breakpoints2>
+        <Bp0>_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\Src\app_ins_ekf_quaternion.c}.95.9" 0 0 1 "" 0 "" 0</Bp0>
+        <Count>1</Count>
+    </Breakpoints2>
     <LogFile>
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
@@ -108,6 +115,16 @@
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
     </TermIOLog>
+    <Aliases>
+        <A0>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c" ""</A0>
+        <A1>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_flash.c" ""</A1>
+        <A2>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c" ""</A2>
+        <A3>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c" ""</A3>
+        <A4>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Src\app_led.c" ""</A4>
+        <A5>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Src\main.c" ""</A5>
+        <Count>6</Count>
+        <SuppressDialog>0</SuppressDialog>
+    </Aliases>
     <DriverProfiling>
         <Enabled>0</Enabled>
         <Mode>3</Mode>
@@ -121,21 +138,4 @@
     <CallStackStripe>
         <ShowTiming>1</ShowTiming>
     </CallStackStripe>
-    <DisassembleMode>
-        <mode>0</mode>
-    </DisassembleMode>
-    <Breakpoints2>
-        <Bp0>_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\Src\app_ins.c}.422.1" 0 0 1 "" 0 "" 0</Bp0>
-        <Count>1</Count>
-    </Breakpoints2>
-    <Aliases>
-        <A0>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c" ""</A0>
-        <A1>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_flash.c" ""</A1>
-        <A2>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c" ""</A2>
-        <A3>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c" ""</A3>
-        <A4>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Src\app_led.c" ""</A4>
-        <A5>_ "J:\LAN\CODE\SFOX_ZERO\SFOX_ZERO\Src\main.c" ""</A5>
-        <Count>6</Count>
-        <SuppressDialog>0</SuppressDialog>
-    </Aliases>
 </settings>

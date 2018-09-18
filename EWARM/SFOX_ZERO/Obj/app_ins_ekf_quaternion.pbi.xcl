@@ -1,4 +1,4 @@
-"D:\WORK\DEVO\CODE\SFOX_ZERO\SFOX_ZERO\Src\uwb1000.c"
+"D:\WORK\DEVO\CODE\SFOX_ZERO\SFOX_ZERO\Src\app_ins_ekf_quaternion.c"
 -std=c11
 -ferror-limit=0
 -fbracket-depth=512

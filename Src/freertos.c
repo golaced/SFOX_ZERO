@@ -58,11 +58,12 @@
 #include "ms5803.h"
 #include "motor_pwm.h"
 #include "app_led.h"
-#include "app_ins.h"
+// #include "app_ins.h"
 #include "time.h"
 #include "app_ctrl.h"
 #include "app_ros.h"
 #include "app_uwb.h"
+#include "app_ins_ekf_quaternion.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -299,11 +300,12 @@ void StartTask06BackEnd(void const * argument)
   {
     time_consume[app_backend_time_index][0] = get_sys_time_us();
     det_t_s.det_t_app_backend_s = get_cycle_time(app_backend_time_index);
-    app_ins_thread(det_t_s.det_t_app_backend_s);
+    //app_ins_thread(det_t_s.det_t_app_backend_s);
+    app_ins_ekf_quaternion_thread(det_t_s.det_t_app_backend_s);
     app_ctrl_thread(det_t_s.det_t_app_backend_s);
     time_consume[app_backend_time_index][1] = get_sys_time_us();
     app_backend_time_consume_us = time_consume[app_backend_time_index][1] - time_consume[app_backend_time_index][0];
-    osDelay(1);
+    osDelay(50);
   }
   /* USER CODE END StartTask06BackEnd */
 }

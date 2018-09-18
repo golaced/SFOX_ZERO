@@ -1199,6 +1199,9 @@
                 <name>$PROJ_DIR$\..\Src\app_ins.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Src\app_ins_ekf_quaternion.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Src\app_led.c</name>
             </file>
             <file>
