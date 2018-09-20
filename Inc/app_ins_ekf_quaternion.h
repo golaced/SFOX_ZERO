@@ -4,8 +4,8 @@
 //全局变量
 extern float roll_deg,pitch_deg,yaw_deg;
 extern float quat0,quat1,quat2,quat3;
-extern float pos_north,pos_east,pos_alt;
-extern float vel_north,pos_east,vel_alt;
+//extern float pos_north,pos_east,pos_alt;
+//extern float vel_north,pos_east,vel_down;
 extern float bias_gyrox,bias_gyroy,bias_gyroz;
 extern float bias_accx,bias_accy,bias_accz;
 
