@@ -13,6 +13,7 @@ void MatException(void)
 //初始化矩阵
 int MatCreate(Mat *mat, const int row, const int col)
 {
+	int i;
 	//设定行列数量
 	mat->row = row;
 	mat->col = col;
@@ -25,13 +26,13 @@ int MatCreate(Mat *mat, const int row, const int col)
 		MatException();
 	}
 	//分配每行分配rol内存
-	for (int i = 0; i < row; i++)
+	for (i = 0; i < row; i++)
 	{
 		mat->elements[i] = (MatDataType*)malloc(col * sizeof(MatDataType));
 		memset(mat->elements[i], 0, col * sizeof(MatDataType));
 	}
 	//判断每行内存是否分配成功
-	for (int i = 0; i < row; i++)
+	for (i = 0; i < row; i++)
 	{
 		if (mat->elements[i] == NULL)
 		{
@@ -43,11 +44,12 @@ int MatCreate(Mat *mat, const int row, const int col)
 
 //矩阵赋值
 Mat* MatInit(Mat * mat, MatDataType elements[])
-{	
+{
+	int i,j;
 	if ((MatIsValid(mat) != 0))	MatException();
-	for (int i = 0; i < mat->row; i++)
+	for (i = 0; i < mat->row; i++)
 	{
-		for (int j = 0; j < mat->col; j++)
+		for (j = 0; j < mat->col; j++)
 		{
 			mat->elements[i][j] = elements[j + (i * mat->col)];
 		}
@@ -58,14 +60,15 @@ Mat* MatInit(Mat * mat, MatDataType elements[])
 //打印矩阵
 int MatPrint(Mat * mat)
 {
+	int i,j;
 	if(MatIsValid(mat)!=0)	MatException();
 	//if (mat->elements == NULL)	MatException();
 	printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-----\n");
 	int row = mat->row;
 	int col = mat->col;
-	for (int i = 0; i<row; i++)
+	for (i = 0; i<row; i++)
 	{
-		for (int j = 0; j<col; j++)
+		for (j = 0; j<col; j++)
 		{
 			//int index = i * col + j + 1;
 			if (j == 0)	printf("[");
@@ -81,9 +84,10 @@ int MatPrint(Mat * mat)
 //判断矩阵是否有效(有效0，无效非0）
 int MatIsValid(Mat * mat)
 {
+	int i;
 	if (mat->elements == NULL)	return -1;
 	if (mat->row < 0 || mat->col < 0)	return -2;
-	for (int i = 0; i < mat->row; i++)
+	for (i = 0; i < mat->row; i++)
 	{
 		if (mat->elements[i] == NULL)	return -3;
 	}
@@ -93,8 +97,9 @@ int MatIsValid(Mat * mat)
 //销毁矩阵
 int MatDelete(Mat * mat)
 {
+	int i;
 	if ((MatIsValid(mat) != 0))	MatException();
-	for (int i = 0; i < mat->row; i++)
+	for (i = 0; i < mat->row; i++)
 	{
 		free(mat->elements[i]);
 		mat->elements[i] = NULL;
@@ -107,6 +112,7 @@ int MatDelete(Mat * mat)
 //矩阵乘法 C = A * B
 Mat* MatMultiply(Mat *matC, Mat *matA, Mat *matB)
 {
+	int i,j,k;
 	MatDataType temp = 0;
 	//判断A B C是否存在
 	if ((MatIsValid(matC) != 0) || (MatIsValid(matA) != 0) || (MatIsValid(matB) != 0))	MatException();
@@ -118,11 +124,11 @@ Mat* MatMultiply(Mat *matC, Mat *matA, Mat *matB)
 	}
 	matC->row = matA->row;
 	matC->col = matB->col;
-	for (int i = 0; i < matC->row; i++)
+	for (i = 0; i < matC->row; i++)
 	{
-		for (int j = 0; j < matC->col; j++)
+		for (j = 0; j < matC->col; j++)
 		{
-			for (int k = 0; k < matA->col; k++)
+			for (k = 0; k < matA->col; k++)
 			{
 				temp += matA->elements[i][k] * matB->elements[k][j];
 			}
@@ -136,6 +142,7 @@ Mat* MatMultiply(Mat *matC, Mat *matA, Mat *matB)
 //矩阵求逆（LU分解法）
 Mat* MatInverse(Mat * invA, Mat * matA)
 {
+	int i,j,k;
 	//判断矩阵matA和invA是否存在
 	if ((MatIsValid(matA) != 0) || (MatIsValid(invA) != 0))	MatException();
 	//判断矩阵matA和invA是否是方阵，维数是否一致
@@ -143,76 +150,76 @@ Mat* MatInverse(Mat * invA, Mat * matA)
 	//矩阵求逆
 	int N = matA->row;	//方阵大小
 	Mat matL, invL, matU, invU;	//新建L U 等辅助矩阵
-	//matL = (MatDataType*)malloc(sizeof(Mat));	
+	//matL = (MatDataType*)malloc(sizeof(Mat));
 	MatCreate(&matL, N, N);
-	//invL = (MatDataType*)malloc(sizeof(Mat));	
+	//invL = (MatDataType*)malloc(sizeof(Mat));
 	MatCreate(&invL, N, N);
-	//matU = (MatDataType*)malloc(sizeof(Mat));	
+	//matU = (MatDataType*)malloc(sizeof(Mat));
 	MatCreate(&matU, N, N);
-	//invU = (MatDataType*)malloc(sizeof(Mat));	
+	//invU = (MatDataType*)malloc(sizeof(Mat));
 	MatCreate(&invU, N, N);
 	//L=eye(N)
 	MatEye(&matL);
 	MatDataType s;
-	for (int i = 0; i < N; i++)
+	for (i = 0; i < N; i++)
 	{
-		for (int j = i; j < N; j++)
+		for (j = i; j < N; j++)
 		{
 			s = 0;
-			for (int k = 0; k < i; k++)
+			for (k = 0; k < i; k++)
 			{
 				s += matL.elements[i][k] * matU.elements[k][j];
 			}
-			matU.elements[i][j] = matA->elements[i][j] - s;      //按行计算u值           
+			matU.elements[i][j] = matA->elements[i][j] - s;      //按行计算u值
 		}
 
-		for (int j = i + 1; j < N; j++)
+		for (j = i + 1; j < N; j++)
 		{
 			s = 0;
-			for (int k = 0; k < i; k++)
+			for (k = 0; k < i; k++)
 			{
 				s += matL.elements[j][k] * matU.elements[k][i];
 			}
 			matL.elements[j][i] = (matA->elements[j][i] - s) / matU.elements[i][i];      //按列计算l值
 		}
 	}
-	for (int i = 0; i < N; i++)        //按行序，行内从高到低，计算l的逆矩阵
+	for (i = 0; i < N; i++)        //按行序，行内从高到低，计算l的逆矩阵
 	{
 		invL.elements[i][i] = 1;
 	}
-	for (int i = 1; i < N; i++)
+	for (i = 1; i < N; i++)
 	{
-		for (int j = 0; j < i; j++)
+		for (j = 0; j < i; j++)
 		{
 			s = 0;
-			for (int k = 0; k < i; k++)
+			for (k = 0; k < i; k++)
 			{
 				s += matL.elements[i][k] * invL.elements[k][j];
 			}
 			invL.elements[i][j] = -s;
 		}
 	}
-	for (int i = 0; i < N; i++)                    //按列序，列内按照从下到上，计算u的逆矩阵
+	for (i = 0; i < N; i++)                    //按列序，列内按照从下到上，计算u的逆矩阵
 	{
 		invU.elements[i][i] = 1 / matU.elements[i][i];
 	}
-	for (int i = 1; i < N; i++)
+	for (i = 1; i < N; i++)
 	{
-		for (int j = i - 1; j >= 0; j--)
+		for (j = i - 1; j >= 0; j--)
 		{
 			s = 0;
-			for (int k = j + 1; k <= i; k++)
+			for (k = j + 1; k <= i; k++)
 			{
 				s += matU.elements[j][k] * invU.elements[k][i];
 			}
 			invU.elements[j][i] = -s / matU.elements[j][j];
 		}
 	}
-	for (int i = 0; i < N; i++)            //计算矩阵a的逆矩阵
+	for (i = 0; i < N; i++)            //计算矩阵a的逆矩阵
 	{
-		for (int j = 0; j < N; j++)
+		for (j = 0; j < N; j++)
 		{
-			for (int k = 0; k < N; k++)
+			for (k = 0; k < N; k++)
 			{
 				invA->elements[i][j] += invU.elements[i][k] * invL.elements[k][j];
 			}
@@ -228,9 +235,10 @@ Mat* MatInverse(Mat * invA, Mat * matA)
 //矩阵eye(n)
 Mat* MatEye(Mat * matA)
 {
+	int i;
 	if (MatIsValid(matA)!=0)	MatException();
 	MatZeros(matA);
-	for (int i = 0; i < (matA->row < matA->col ? matA->row : matA->col); i++)
+	for (i = 0; i < (matA->row < matA->col ? matA->row : matA->col); i++)
 	{
 		matA->elements[i][i] = 1;
 	}
@@ -240,8 +248,9 @@ Mat* MatEye(Mat * matA)
 //矩阵全零
 Mat* MatZeros(Mat * matA)
 {
+	int i;
 	if (MatIsValid(matA)!=0)	MatException();
-	for (int i = 0; i < matA->row; i++)
+	for (i = 0; i < matA->row; i++)
 	{
 		memset(matA->elements[i], 0, matA->col*sizeof(MatDataType));
 	}
@@ -251,6 +260,7 @@ Mat* MatZeros(Mat * matA)
 //矩阵加法
 Mat* MatAdd(Mat * matC, Mat * matA, Mat * matB)
 {
+	int i,j;
 	//判断矩阵是否有效
 	if ((MatIsValid(matC) != 0)||(MatIsValid(matA) != 0)||(MatIsValid(matB) != 0))	MatException();
 	//判断三个矩阵大小是否相同
@@ -259,9 +269,9 @@ Mat* MatAdd(Mat * matC, Mat * matA, Mat * matB)
 	int B_row = matB->row; int B_col = matB->col;
 	if ((C_row != A_row) || (C_row != B_row) || (C_col != A_col) || (C_col != B_col))	MatException();
 	//进行加法
-	for (int i = 0; i < matC->row; i++)
+	for (i = 0; i < matC->row; i++)
 	{
-		for (int j = 0; j < matC->col; j++)
+		for (j = 0; j < matC->col; j++)
 		{
 			matC->elements[i][j] = matA->elements[i][j] + matB->elements[i][j];
 		}
@@ -272,6 +282,7 @@ Mat* MatAdd(Mat * matC, Mat * matA, Mat * matB)
 //矩阵减法
 Mat * MatSub(Mat * matC, Mat * matA, Mat * matB)
 {
+	int i,j;
 	//判断矩阵是否有效
 	if ((MatIsValid(matC) != 0) || (MatIsValid(matA) != 0) || (MatIsValid(matB) != 0))	MatException();
 	//判断三个矩阵大小是否相同
@@ -280,9 +291,9 @@ Mat * MatSub(Mat * matC, Mat * matA, Mat * matB)
 	int B_row = matB->row; int B_col = matB->col;
 	if ((C_row != A_row) || (C_row != B_row) || (C_col != A_col) || (C_col != B_col))	MatException();
 	//进行加法
-	for (int i = 0; i < matC->row; i++)
+	for (i = 0; i < matC->row; i++)
 	{
-		for (int j = 0; j < matC->col; j++)
+		for (j = 0; j < matC->col; j++)
 		{
 			matC->elements[i][j] = matA->elements[i][j] - matB->elements[i][j];
 		}
@@ -293,12 +304,13 @@ Mat * MatSub(Mat * matC, Mat * matA, Mat * matB)
 //矩阵数乘
 Mat * MatScalarMultiply(Mat * matA, MatDataType num)
 {
+	int i,j;
 	//判断矩阵是否有效
 	if (MatIsValid(matA)!=0)	MatException();
 	//逐元素进行数乘
-	for (int i = 0; i < matA->row; i++)
+	for (i = 0; i < matA->row; i++)
 	{
-		for (int j = 0; j < matA->col; j++)
+		for (j = 0; j < matA->col; j++)
 		{
 			matA->elements[i][j] = matA->elements[i][j] * num;
 		}
@@ -309,14 +321,15 @@ Mat * MatScalarMultiply(Mat * matA, MatDataType num)
 //矩阵转置
 Mat * MatTrans(Mat * matAt, Mat * matA)
 {
+	int i,j;
 	//判断矩阵matA和matAt是否存在
 	if ((MatIsValid(matA) != 0) || (MatIsValid(matAt) != 0))	MatException();
 	//判断矩阵matA和invA维数是否满足要求
 	if ((matA->col != matAt->row) || (matA->row != matAt->col))	MatException();
 	//进行转置
-	for (int i = 0; i < matA->row; i++)
+	for (i = 0; i < matA->row; i++)
 	{
-		for (int j = 0; j < matA->col; j++)
+		for (j = 0; j < matA->col; j++)
 		{
 			matAt->elements[j][i] = matA->elements[i][j];
 		}
@@ -329,10 +342,11 @@ Mat * MatTrans(Mat * matAt, Mat * matA)
 //BIG和小矩阵应当提前声明好
 Mat * MatBlockCompose(Mat *BIG, Mat *Blocks, const int M, const int N)
 {
+	int i,j,k,l;
 	//判断各个分块矩阵是否合法
-	for (int i = 0; i < M; i++)
+	for (i = 0; i < M; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (j = 0; j < N; j++)
 		{
 			if (MatIsValid(&Blocks[i*N + j]) != 0)	MatException();
 		}
@@ -341,13 +355,13 @@ Mat * MatBlockCompose(Mat *BIG, Mat *Blocks, const int M, const int N)
 	if (MatIsValid(BIG) != 0)	MatException();
 	//判断大矩阵与小矩阵之间的维数是否相匹配
 	int total_row = 0, total_col = 0;
-	for (int i = 0; i < M; i++)
+	for (i = 0; i < M; i++)
 	{
 		total_row += Blocks[i*N].row;
 		//printf("Block[%d].row:%d\n",i*N, Blocks[i*N].row);
 		//printf("total_row:%d\n",total_row);
 	}
-	for (int j = 0; j < N; j++)
+	for (j = 0; j < N; j++)
 	{
 		total_col += Blocks[j].col;
 		//printf("Block[%d].col:%d\n", j, Blocks[j].col);
@@ -355,9 +369,9 @@ Mat * MatBlockCompose(Mat *BIG, Mat *Blocks, const int M, const int N)
 	}
 	if ((total_row != BIG->row) || (total_col != BIG->col))	MatException();
 	//判断每行的分块矩阵具有相同的row
-	for (int i = 0; i < M; i++)
+	for (i = 0; i < M; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (j = 0; j < N; j++)
 		{
 			if (Blocks[i*N].row != Blocks[i*N + j].row)
 			{
@@ -366,9 +380,9 @@ Mat * MatBlockCompose(Mat *BIG, Mat *Blocks, const int M, const int N)
 		}
 	}
 	//判断每列的分块矩阵具有相同的col
-	for (int j = 0; j < N; j++)//col
+	for (j = 0; j < N; j++)//col
 	{
-		for (int i = 0; i < M; i++)//row
+		for (i = 0; i < M; i++)//row
 		{
 			if (Blocks[j].col != Blocks[i*N + j].col)
 			{
@@ -378,13 +392,13 @@ Mat * MatBlockCompose(Mat *BIG, Mat *Blocks, const int M, const int N)
 	}
 	//将小矩阵依次放入大矩阵
 	int start_row = 0, start_col = 0;
-	for (int i = 0; i < M; i++)
+	for (i = 0; i < M; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (j = 0; j < N; j++)
 		{
-			for (int k = 0; k < Blocks[i*N + j].row; k++)
+			for (k = 0; k < Blocks[i*N + j].row; k++)
 			{
-				for (int l = 0; l < Blocks[i*N + j].col; l++)
+				for (l = 0; l < Blocks[i*N + j].col; l++)
 				{
 					BIG->elements[start_row + k][start_col + l] = Blocks[i*N + j].elements[k][l];
 				}
@@ -401,6 +415,7 @@ Mat * MatBlockCompose(Mat *BIG, Mat *Blocks, const int M, const int N)
 //大矩阵提取某一分块矩阵，行范围：[rowA,rowB]；列范围：[colA,colB]
 Mat * MatBlockDecompose(Mat * Block, Mat * BIG, const int rowA, const int colA, const int rowB, const int colB)
 {
+	int i,j,m,n;
 	//判断Block与BIG是否存在
 	if ((MatIsValid(Block) != 0) || (MatIsValid(BIG) != 0))	MatException();
 	//判断输入坐标是否超出BIG范围
@@ -409,9 +424,9 @@ Mat * MatBlockDecompose(Mat * Block, Mat * BIG, const int rowA, const int colA, 
 	//判断输入坐标是否满足Block大小
 	if (((rowB - rowA + 1) != Block->row) || ((colB - colA + 1) != Block->col))	MatException();
 	//根据坐标范围提取小矩阵
-	for (int i = rowA,m=0; i <= rowB; i++,m++)
+	for (i = rowA,m=0; i <= rowB; i++,m++)
 	{
-		for (int j = colA,n=0; j <= colB; j++,n++)
+		for (j = colA,n=0; j <= colB; j++,n++)
 		{
 			Block->elements[m][n] = BIG->elements[i][j];
 		}
@@ -422,6 +437,7 @@ Mat * MatBlockDecompose(Mat * Block, Mat * BIG, const int rowA, const int colA, 
 //对角矩阵
 Mat * MatDiag(Mat * matA, MatDataType elements[], int M)
 {
+	int i;
 	//判断矩阵是否存在
 	if (MatIsValid(matA) != 0)	MatException();
 	//判断矩阵是否为方阵
@@ -430,7 +446,7 @@ Mat * MatDiag(Mat * matA, MatDataType elements[], int M)
 	int diag_length = matA->row;
 	if (M <= 0)	MatException();
 	if (diag_length != M)	MatException();
-	for (int i = 0; i < M; i++)
+	for (i = 0; i < M; i++)
 	{
 		matA->elements[i][i] = elements[i];
 	}
@@ -444,7 +460,7 @@ MatDataType MatAt(Mat * matA, int M, int N)
 }
 
 int MatSetValAt(Mat * matA, int M, int N, MatDataType Val)
-{	
+{
 	if (MatIsValid(matA) != 0)	MatException();
 	if (M>=matA->row || N>=matA->col)	MatException();
 	matA->elements[M][N] = Val;
@@ -453,13 +469,14 @@ int MatSetValAt(Mat * matA, int M, int N, MatDataType Val)
 
 Mat * MatCopy(Mat * matA, Mat * matB)
 {
+	int i,j;
 	//判断矩阵是否存在
 	if ((MatIsValid(matA) != 0) || (MatIsValid(matB) != 0))	MatException();
 	//判断矩阵维数是否相同
 	if ((matA->row != matB->row) || (matA->col != matB->col))	MatException();
-	for (int i = 0; i < matB->row; i++)
+	for (i = 0; i < matB->row; i++)
 	{
-		for (int j = 0; j < matB->col; j++)
+		for (j = 0; j < matB->col; j++)
 		{
 			matA->elements[i][j] = matB->elements[i][j];
 		}
@@ -489,7 +506,7 @@ int VectorSort(Mat *Vec, int sign)
 	}
 	if (sign == 0)//升序
 	{
-		qsort(Vec->elements[0], Vec->col, sizeof(MatDataType), com_ascend);  
+		qsort(Vec->elements[0], Vec->col, sizeof(MatDataType), com_ascend);
 	}
 	if (sign == 1)//降序
 	{
