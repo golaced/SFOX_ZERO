@@ -80,6 +80,11 @@ int obtain_sensors_data(void)
     return 0;
 }
 
+
+//状态维数
+#define NSTATES 16
+//量测维数
+#define NMEASURES  9
 int ekf_basedon_quaternion(float dt_s,
                            float wx, float wy, float wz, float fx, float fy, float fz, float mx, float my, float mz,
                            float pos_north, float pos_east, float pos_alt, float vel_north, float vel_east, float vel_down)
@@ -88,128 +93,82 @@ int ekf_basedon_quaternion(float dt_s,
     if(RunOnce==0)
     {
         //状态初始化
-        MatCreate(&ekf_xhat, 16, 1);
-        MatDataType ekf_xhat_init[16] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+        MatCreate(&ekf_xhat, NSTATES, 1);
+        MatDataType ekf_xhat_init[NSTATES] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         MatInit(&ekf_xhat, ekf_xhat_init);
         //P矩阵初始化
-        // MatCreate(&ekf_P, 16, 16);
-        // MatDataType ekf_P_init[16] = {large_quad_uncertainty, large_quad_uncertainty, large_quad_uncertainty, large_quad_uncertainty,
-        //                               large_pos_uncertainty_m, large_pos_uncertainty_m, large_pos_uncertainty_m,
-        //                               large_vel_uncertainty_mps, large_vel_uncertainty_mps, large_vel_uncertainty_mps,
-        //                               ekf_sigmas_gyro_bias_rps, ekf_sigmas_gyro_bias_rps, ekf_sigmas_gyro_bias_rps,
-        //                               ekf_sigmas_accel_bias_mps2, ekf_sigmas_accel_bias_mps2, ekf_sigmas_accel_bias_mps2};
-        // MatDiag(&ekf_P, ekf_P_init, 16);
-        MatCreate(&ekf_P, 16, 16);
+        MatCreate(&ekf_P, NSTATES, NSTATES);
         MatDataType *ekf_P_init;	ekf_P_init = (MatDataType*)malloc(sizeof(MatDataType) * 16);
         ekf_P_init[0] = large_quad_uncertainty; ekf_P_init[1] = large_quad_uncertainty; ekf_P_init[2] = large_quad_uncertainty;ekf_P_init[3] = large_quad_uncertainty;
         ekf_P_init[4] = large_pos_uncertainty_m;    ekf_P_init[5] = large_pos_uncertainty_m;    ekf_P_init[6] = large_pos_uncertainty_m;
         ekf_P_init[7] = large_vel_uncertainty_mps;  ekf_P_init[8] = large_vel_uncertainty_mps;  ekf_P_init[9] = large_vel_uncertainty_mps;
         ekf_P_init[10] = ekf_sigmas_gyro_bias_rps;   ekf_P_init[11] = ekf_sigmas_gyro_bias_rps;   ekf_P_init[12] = ekf_sigmas_gyro_bias_rps;
         ekf_P_init[13] = ekf_sigmas_accel_bias_mps2; ekf_P_init[14] = ekf_sigmas_accel_bias_mps2; ekf_P_init[15] = ekf_sigmas_accel_bias_mps2;
-
-        MatDiag(&ekf_P, ekf_P_init, 16);
+        MatDiag(&ekf_P, ekf_P_init, NSTATES);
         free(ekf_P_init);
-
+        //
         RunOnce = 1;
     }
-    Mat ekf_Q;
-    Mat ekf_R;
     //Q矩阵初始化
-    // MatCreate(&ekf_Q, 16, 16);
-    // MatDataType ekf_Q_init[16] = {ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise, ekf_sigmas_quad_process_noise,
-    //                               ekf_sigmas_pos_process_noise_m, ekf_sigmas_pos_process_noise_m, ekf_sigmas_pos_process_noise_m,
-    //                               ekf_sigmas_vel_process_noise_mps, ekf_sigmas_vel_process_noise_mps, ekf_sigmas_vel_process_noise_mps,
-    //                               ekf_sigmas_gyroBias_process_noise_rps, ekf_sigmas_gyroBias_process_noise_rps, ekf_sigmas_gyroBias_process_noise_rps,
-    //                               ekf_sigmas_accelBias_process_noise_mps2, ekf_sigmas_accelBias_process_noise_mps2, ekf_sigmas_accelBias_process_noise_mps2};
-    // MatDiag(&ekf_Q, ekf_Q_init, 16);
-    MatCreate(&ekf_Q, 16, 16);
-    MatDataType *ekf_Q_init;    ekf_Q_init = (MatDataType*)malloc(sizeof(MatDataType) * 16);
+    Mat ekf_Q;
+    MatCreate(&ekf_Q, NSTATES, NSTATES);
+    MatDataType *ekf_Q_init;    ekf_Q_init = (MatDataType*)malloc(sizeof(MatDataType) * NSTATES);
     ekf_Q_init[0] = ekf_sigmas_quad_process_noise;   ekf_Q_init[1] = ekf_sigmas_quad_process_noise;   ekf_Q_init[2] = ekf_sigmas_quad_process_noise;   ekf_Q_init[3] = ekf_sigmas_quad_process_noise;
     ekf_Q_init[4] = ekf_sigmas_pos_process_noise_m;   ekf_Q_init[5] = ekf_sigmas_pos_process_noise_m;   ekf_Q_init[6] = ekf_sigmas_pos_process_noise_m;
     ekf_Q_init[7] = ekf_sigmas_vel_process_noise_mps;   ekf_Q_init[8] = ekf_sigmas_vel_process_noise_mps;   ekf_Q_init[9] = ekf_sigmas_vel_process_noise_mps;
     ekf_Q_init[10] = ekf_sigmas_gyroBias_process_noise_rps;   ekf_Q_init[11] = ekf_sigmas_gyroBias_process_noise_rps;   ekf_Q_init[12] = ekf_sigmas_gyroBias_process_noise_rps;
     ekf_Q_init[13] = ekf_sigmas_accelBias_process_noise_mps2;   ekf_Q_init[14] = ekf_sigmas_accelBias_process_noise_mps2;   ekf_Q_init[15] = ekf_sigmas_accelBias_process_noise_mps2;
-    MatDiag(&ekf_Q, ekf_Q_init, 16);
+    MatDiag(&ekf_Q, ekf_Q_init, NSTATES);
     free(ekf_Q_init);
     //R矩阵初始化
-    // MatCreate(&ekf_R, 9, 9);
-    // MatDataType ekf_R_init[9] = {
-    //     ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m,\
-    //     ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m, ekf_sigmas_pos_meas_m,\
-    //     ekf_sigmas_vel_meas_m, ekf_sigmas_vel_meas_m, ekf_sigmas_vel_meas_m};
-    // MatDiag(&ekf_R, ekf_R_init, 9);
-    MatCreate(&ekf_R, 9, 9);
+    Mat ekf_R;
+    MatCreate(&ekf_R, NMEASURES, NMEASURES);
     MatDataType *ekf_R_init;    ekf_R_init = (MatDataType*)malloc(sizeof(MatDataType)*9);
     ekf_R_init[0] = ekf_sigmas_mag3D_unitVector_meas; ekf_R_init[1] = ekf_sigmas_mag3D_unitVector_meas; ekf_R_init[2] = ekf_sigmas_mag3D_unitVector_meas;
     ekf_R_init[3] = ekf_sigmas_pos_meas_m; ekf_R_init[4] = ekf_sigmas_pos_meas_m; ekf_R_init[5] = ekf_sigmas_pos_meas_m;
     ekf_R_init[6] = ekf_sigmas_vel_meas_m; ekf_R_init[7] = ekf_sigmas_vel_meas_m; ekf_R_init[8] = ekf_sigmas_vel_meas_m;
-    MatDiag(&ekf_R, ekf_R_init, 9);
+    MatDiag(&ekf_R, ekf_R_init, NMEASURES);
     free(ekf_R_init);
-        
+    //计算xdot需要的量
     MatDataType q0, q1, q2, q3;
     MatDataType Vn, Ve, Vd;
     MatDataType bwx, bwy, bwz;
     MatDataType bax, bay, baz;
-
     q0 = MatAt(&ekf_xhat, 0, 0), q1 = MatAt(&ekf_xhat, 1, 0), q2 = MatAt(&ekf_xhat, 2, 0), q3 = MatAt(&ekf_xhat, 3, 0);
     Vn = MatAt(&ekf_xhat, 7, 0), Ve = MatAt(&ekf_xhat, 8, 0), Vd = MatAt(&ekf_xhat, 9, 0);
     bwx = MatAt(&ekf_xhat, 10, 0), bwy = MatAt(&ekf_xhat, 11, 0), bwz = MatAt(&ekf_xhat, 12, 0);
     bax = MatAt(&ekf_xhat, 13, 0), bay = MatAt(&ekf_xhat, 14, 0), baz = MatAt(&ekf_xhat, 15, 0);
-    int nStates = 16;
-
     //角速度测量值
-    // Mat Wxyz;	MatCreate(&Wxyz, 3, 1);
-    // MatDataType Wxyz_data[3] = { wx,wy,wz };
-    // MatInit(&Wxyz, Wxyz_data);
     Mat Wxyz;	MatCreate(&Wxyz, 3, 1);
     MatDataType *Wxyz_data = (MatDataType*)malloc(sizeof(MatDataType)*3);
     Wxyz_data[0] = wx;Wxyz_data[1] = wy;Wxyz_data[2] = wz;
     MatInit(&Wxyz, Wxyz_data);
     free(Wxyz_data);
     //加表测量值
-    // Mat Fxyz;	MatCreate(&Fxyz, 3, 1);
-    // MatDataType Fxyz_data[3] = { fx,fy,fz };
-    // MatInit(&Fxyz, Fxyz_data);
     Mat Fxyz;	MatCreate(&Fxyz, 3, 1);
     MatDataType *Fxyz_data = (MatDataType*)malloc(sizeof(MatDataType)*3);
     Fxyz_data[0] = fx;Fxyz_data[1] = fy;Fxyz_data[2] = fz;
     MatInit(&Fxyz, Fxyz_data);
     free(Fxyz_data);
     //陀螺仪三轴偏置
-    // Mat Bw;	MatCreate(&Bw, 3, 1);
-    // MatDataType Bw_data[3] = { bwx,bwy,bwz };
-    // MatInit(&Bw, Bw_data);
     Mat Bw;	MatCreate(&Bw, 3, 1);
     MatDataType *Bw_data = (MatDataType*)malloc(sizeof(MatDataType)*3);
     Bw_data[0] = bwx;Bw_data[1] = bwy;Bw_data[2] = bwz;
     MatInit(&Bw, Bw_data);
     free(Bw_data);
     //加表三轴偏置
-    // Mat Bf;	MatCreate(&Bf, 3, 1);
-    // MatDataType Bf_data[3] = { bax,bay,baz };
-    // MatInit(&Bf, Bf_data);
     Mat Bf;	MatCreate(&Bf, 3, 1);
     MatDataType *Bf_data = (MatDataType*)malloc(sizeof(MatDataType)*3);
     Bf_data[0] = bax;Bf_data[1] = bay;Bf_data[2] = baz;
     MatInit(&Bf, Bf_data);
     free(Bf_data);
     //重力向量
-    // Mat Gravity;	MatCreate(&Gravity, 3, 1);
-    // MatDataType Gravity_data[3] = { 0.0f,0.0f,gravity_mps2 };
-    // MatInit(&Gravity, Gravity_data);
     Mat Gravity;	MatCreate(&Gravity, 3, 1);
     MatDataType *Gravity_data = (MatDataType*)malloc(sizeof(MatDataType)*3);
     Gravity_data[0] = 0.0f;Gravity_data[1] = 0.0f;Gravity_data[2] = gravity_mps2;
     MatInit(&Gravity, Gravity_data);
     free(Gravity_data);
     //四元数微分方程
-    // Mat C_bodyrate2qdot;
-    // MatCreate(&C_bodyrate2qdot, 4, 3);
-    // MatDataType C_bodyrate2qdot_data[12] = {-0.5 * q1, -0.5 * q2, -0.5 * q3,
-    //                                         0.5 * q0, -0.5 * q3, 0.5 * q2,
-    //                                         0.5 * q3, 0.5 * q0, -0.5 * q1,
-    //                                         -0.5 * q2, 0.5 * q1, 0.5 * q0};
-    // MatInit(&C_bodyrate2qdot, C_bodyrate2qdot_data);
     Mat C_bodyrate2qdot;
     MatCreate(&C_bodyrate2qdot, 4, 3);
     MatDataType *C_bodyrate2qdot_data;  C_bodyrate2qdot_data = (MatDataType*)malloc(sizeof(MatDataType)*12);
@@ -220,12 +179,6 @@ int ekf_basedon_quaternion(float dt_s,
     MatInit(&C_bodyrate2qdot, C_bodyrate2qdot_data);
     free(C_bodyrate2qdot_data);
     //计算旋转矩阵C_ned2b
-    // Mat C_ned2b;
-    // MatCreate(&C_ned2b, 3, 3);
-    // MatDataType C_ned2b_data[9] = {1 - 2 * (q2 * q2 + q3 * q3), 2 * (q1 * q2 + q3 * q0), 2 * (q1 * q3 - q2 * q0),
-    //                                2 * (q1 * q2 - q3 * q0), 1 - 2 * (q1 * q1 + q3 * q3), 2 * (q2 * q3 + q1 * q0),
-    //                                2 * (q1 * q3 + q2 * q0), 2 * (q2 * q3 - q1 * q0), 1 - 2 * (q1 * q1 + q2 * q2)};
-    // MatInit(&C_ned2b, C_ned2b_data);
     Mat C_ned2b;
     MatCreate(&C_ned2b, 3, 3);
     MatDataType *C_ned2b_data;  C_ned2b_data = (MatDataType*)malloc(sizeof(MatDataType)*9);
@@ -239,7 +192,6 @@ int ekf_basedon_quaternion(float dt_s,
     MatCreate(&C_b2ned, 3, 3);
     MatZeros(&C_b2ned);
     MatTrans(&C_b2ned, &C_ned2b);
-
     //计算Xdot
     Mat Xdot;
     MatCreate(&Xdot, 16, 1);
@@ -257,8 +209,6 @@ int ekf_basedon_quaternion(float dt_s,
     Xdot_part2.elements[0][0] = Vn;
     Xdot_part2.elements[1][0] = Ve;
     Xdot_part2.elements[2][0] = -Vd;
-    //MatDataType Xdot_part2_data[3] = {Vn, Ve, -Vd};
-    //MatInit(&Xdot_part2, Xdot_part2_data);
 
     Mat Xdot_part3;
     MatCreate(&Xdot_part3, 3, 1);
@@ -278,8 +228,6 @@ int ekf_basedon_quaternion(float dt_s,
     MatCreate(&Xdot_part5, 3, 1);
     MatZeros(&Xdot_part5);
 
-    // Mat Xdot_blocks[] = {Xdot_part1, Xdot_part2, Xdot_part3, Xdot_part4, Xdot_part5};
-    // MatBlockCompose(&Xdot, (Mat*)&Xdot_blocks, 5, 1);
     Mat Xdot_blocks[5];
     Xdot_blocks[0] = Xdot_part1;
     Xdot_blocks[1] = Xdot_part2;
@@ -309,8 +257,8 @@ int ekf_basedon_quaternion(float dt_s,
     //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     // MatInit(&F, F_data);
     Mat F;
-    MatCreate(&F, 16, 16);
-    MatDataType *F_data;    F_data = (MatDataType*)malloc(sizeof(MatDataType)*256);
+    MatCreate(&F, NSTATES, NSTATES);
+    MatDataType *F_data;    F_data = (MatDataType*)malloc(sizeof(MatDataType)*NSTATES*NSTATES);
     F_data[0]=0,F_data[1]=bwx / 2 - wx / 2,F_data[2]=bwy / 2 - wy / 2,F_data[3]=bwz / 2 - wz / 2,F_data[4]=0,F_data[5]=0,F_data[6]=0,F_data[7]=0,F_data[8]=0,F_data[9]=0,F_data[10]=q1 / 2,F_data[11]=q2 / 2,F_data[12]=q3 / 2,F_data[13]=0,F_data[14]=0,F_data[15]=0,
     F_data[16]=wx / 2 - bwx / 2,F_data[17]=0,F_data[18]=wz / 2 - bwz / 2,F_data[19]=bwy / 2 - wy / 2,F_data[20]=0,F_data[21]=0,F_data[22]=0,F_data[23]=0,F_data[24]=0,F_data[25]=0,F_data[26]=-q0 / 2,F_data[27]=q3 / 2,F_data[28]=-q2 / 2,F_data[29]=0,F_data[30]=0,F_data[31]=0,
     F_data[32]=wy / 2 - bwy / 2,F_data[33]=bwz / 2 - wz / 2,F_data[34]=0,F_data[35]=wx / 2 - bwx / 2,F_data[36]=0,F_data[37]=0,F_data[38]=0,F_data[39]=0,F_data[40]=0,F_data[41]=0,F_data[42]=-q3 / 2,F_data[43]=-q0 / 2,F_data[44]=q1 / 2,F_data[45]=0,F_data[46]=0,F_data[47]=0,
@@ -331,28 +279,27 @@ int ekf_basedon_quaternion(float dt_s,
     free(F_data);
 
     Mat Ft;
-    MatCreate(&Ft, 16, 16);
+    MatCreate(&Ft, NSTATES, NSTATES);
     MatTrans(&Ft, &F);
     //PHI_K & Q_K
     Mat AA;
-    MatCreate(&AA, 32, 32);
-    Mat AA_Zeros16;
-    MatCreate(&AA_Zeros16, 16, 16);
-    MatZeros(&AA_Zeros16);
+    MatCreate(&AA, NSTATES*2, NSTATES*2);
+    Mat AA_Zeros;
+    MatCreate(&AA_Zeros, NSTATES, NSTATES);
+    MatZeros(&AA_Zeros);
     Mat AA_a;
-    MatCreate(&AA_a, 16, 16);
+    MatCreate(&AA_a, NSTATES, NSTATES);
     MatCopy(&AA_a, MatScalarMultiply(&F, -1));
     Mat AA_b;
-    MatCreate(&AA_b, 16, 16);
+    MatCreate(&AA_b, NSTATES, NSTATES);
     MatCopy(&AA_b, &ekf_Q);
     Mat AA_c;
-    MatCreate(&AA_c, 16, 16);
-    MatCopy(&AA_c, &AA_Zeros16);
+    MatCreate(&AA_c, NSTATES, NSTATES);
+    MatCopy(&AA_c, &AA_Zeros);
     Mat AA_d;
-    MatCreate(&AA_d, 16, 16);
+    MatCreate(&AA_d, NSTATES, NSTATES);
     MatCopy(&AA_d, &Ft);
-    // Mat AA_blocks[] = {AA_a, AA_b, AA_c, AA_d};
-    // MatBlockCompose(&AA, (Mat*)&AA_blocks, 2, 2);
+
     Mat AA_blocks[4];
     AA_blocks[0] = AA_a;
     AA_blocks[1] = AA_b;
@@ -362,35 +309,35 @@ int ekf_basedon_quaternion(float dt_s,
     MatScalarMultiply(&AA, dt_s);
 
     Mat BB;
-    MatCreate(&BB, 32, 32);
+    MatCreate(&BB, NSTATES*2, NSTATES*2);
     MatZeros(&BB);
-    Mat BB_EYE32;
-    MatCreate(&BB_EYE32, 32, 32);
-    MatEye(&BB_EYE32);
-    MatAdd(&BB, &BB_EYE32, &AA);
+    Mat BB_EYE;
+    MatCreate(&BB_EYE, NSTATES*2, NSTATES*2);
+    MatEye(&BB_EYE);
+    MatAdd(&BB, &BB_EYE, &AA);
 
     Mat PHI_K;
-    MatCreate(&PHI_K, 16, 16);
+    MatCreate(&PHI_K, NSTATES, NSTATES);
     MatZeros(&PHI_K);
     Mat PHI_Kt;
-    MatCreate(&PHI_Kt, 16, 16);
+    MatCreate(&PHI_Kt, NSTATES, NSTATES);
     MatZeros(&PHI_Kt);
-    MatBlockDecompose(&PHI_Kt, &BB, nStates, nStates, nStates * 2 - 1, nStates * 2 - 1);
+    MatBlockDecompose(&PHI_Kt, &BB, NSTATES, NSTATES, NSTATES * 2 - 1, NSTATES * 2 - 1);
     MatTrans(&PHI_K, &PHI_Kt);
 
     Mat BB_rightup;
-    MatCreate(&BB_rightup, 16, 16);
-    MatBlockDecompose(&BB_rightup, &BB, 0, nStates, nStates - 1, nStates * 2 - 1);
+    MatCreate(&BB_rightup, NSTATES, NSTATES);
+    MatBlockDecompose(&BB_rightup, &BB, 0, NSTATES, NSTATES - 1, NSTATES * 2 - 1);
     Mat Q_K;
-    MatCreate(&Q_K, 16, 16);
+    MatCreate(&Q_K, NSTATES, NSTATES);
     MatMultiply(&Q_K, &PHI_K, &BB_rightup);
     //一步预测
     MatAdd(&ekf_xhat, &ekf_xhat, MatScalarMultiply(&Xdot, dt_s));
     //一步预测均方误差
     Mat ekf_Pp_aux1;
-    MatCreate(&ekf_Pp_aux1, 16, 16);
+    MatCreate(&ekf_Pp_aux1, NSTATES, NSTATES);
     Mat ekf_Pp_aux2;
-    MatCreate(&ekf_Pp_aux2, 16, 16);
+    MatCreate(&ekf_Pp_aux2, NSTATES, NSTATES);
     MatMultiply(&ekf_Pp_aux1, &PHI_K, &ekf_P);        //PHI_K*ekf_P
     MatMultiply(&ekf_Pp_aux2, &ekf_Pp_aux1, &PHI_Kt); //PHI_K*ekf_P*PHI_K'
     MatAdd(&ekf_P, &ekf_Pp_aux2, &Q_K);
@@ -421,7 +368,7 @@ int ekf_basedon_quaternion(float dt_s,
     // };
     // MatInit(&ekf_H, ekf_H_data);
     Mat ekf_H;
-    MatCreate(&ekf_H, 9, 16);
+    MatCreate(&ekf_H, NMEASURES, NSTATES);
     MatDataType *ekf_H_data;    ekf_H_data = (MatDataType*)malloc(sizeof(MatDataType)*144);
     ekf_H_data[0] = 0,ekf_H_data[1] =  0,ekf_H_data[2] =  0,ekf_H_data[3] =  0,ekf_H_data[4] =  1,ekf_H_data[5] =  0,ekf_H_data[6] =  0,ekf_H_data[7] =  0,ekf_H_data[8] =  0,ekf_H_data[9] =  0,ekf_H_data[10] =  0,ekf_H_data[11] =  0,ekf_H_data[12] =  0,ekf_H_data[13] =  0,ekf_H_data[14] =  0,ekf_H_data[15] =  0,
     ekf_H_data[16] = 0,ekf_H_data[17] =  0,ekf_H_data[18] =  0,ekf_H_data[19] =  0,ekf_H_data[20] =  0,ekf_H_data[21] =  1,ekf_H_data[22] =  0,ekf_H_data[23] =  0,ekf_H_data[24] =  0,ekf_H_data[25] =  0,ekf_H_data[26] =  0,ekf_H_data[27] =  0,ekf_H_data[28] =  0,ekf_H_data[29] =  0,ekf_H_data[30] =  0,ekf_H_data[31] =  0,
@@ -437,25 +384,25 @@ int ekf_basedon_quaternion(float dt_s,
 
 
     Mat ekf_Ht;
-    MatCreate(&ekf_Ht, 16, 9);
+    MatCreate(&ekf_Ht, NSTATES, NMEASURES);
     MatTrans(&ekf_Ht, &ekf_H);
     //K
     Mat ekf_K;
-    MatCreate(&ekf_K, 16, 9);
+    MatCreate(&ekf_K, NSTATES, NMEASURES);
     Mat ekf_K_aux1;
-    MatCreate(&ekf_K_aux1, 9, 16);
+    MatCreate(&ekf_K_aux1, NMEASURES, NSTATES);
     MatMultiply(&ekf_K_aux1, &ekf_H, &ekf_P); //aux1 = H*P
     Mat ekf_K_aux2;
-    MatCreate(&ekf_K_aux2, 9, 9);
+    MatCreate(&ekf_K_aux2, NMEASURES, NMEASURES);
     MatMultiply(&ekf_K_aux2, &ekf_K_aux1, &ekf_Ht); //aux2 = H*P*Ht
     Mat ekf_K_aux3;
-    MatCreate(&ekf_K_aux3, 9, 9);
+    MatCreate(&ekf_K_aux3, NMEASURES, NMEASURES);
     MatAdd(&ekf_K_aux3, &ekf_K_aux2, &ekf_R); //aux3 = H*P*Ht+R
     Mat ekf_K_aux4;
-    MatCreate(&ekf_K_aux4, 9, 9);
+    MatCreate(&ekf_K_aux4, NMEASURES, NMEASURES);
     MatInverse(&ekf_K_aux4, &ekf_K_aux3); //aux4 = inv(H*P*Ht+R)
     Mat ekf_K_aux5;
-    MatCreate(&ekf_K_aux5, 16, 9);
+    MatCreate(&ekf_K_aux5, NSTATES, NMEASURES);
     MatMultiply(&ekf_K_aux5, &ekf_P, &ekf_Ht); //aux5 = P*Ht
     MatMultiply(&ekf_K, &ekf_K_aux5, &ekf_K_aux4);
     //Z
@@ -465,7 +412,7 @@ int ekf_basedon_quaternion(float dt_s,
     //     pos_north, pos_east, pos_alt, pos_north, pos_east, pos_alt,vel_north,vel_east,vel_down};
     // MatInit(&ekf_Z, ekf_Z_data);
     Mat ekf_Z;
-    MatCreate(&ekf_Z, 9, 1);
+    MatCreate(&ekf_Z, NMEASURES, 1);
     MatDataType *ekf_Z_data;    ekf_Z_data = (MatDataType*)malloc(sizeof(MatDataType)*9);
     ekf_Z_data[0] = pos_north; ekf_Z_data[1] = pos_east; ekf_Z_data[2] = pos_alt;
     ekf_Z_data[3] = pos_north; ekf_Z_data[4] = pos_east; ekf_Z_data[5] = pos_alt;
@@ -474,27 +421,27 @@ int ekf_basedon_quaternion(float dt_s,
     free(ekf_Z_data);
     //状态估计
     Mat ekf_xhat_aux1;
-    MatCreate(&ekf_xhat_aux1, 9, 1);
+    MatCreate(&ekf_xhat_aux1, NMEASURES, 1);
     MatMultiply(&ekf_xhat_aux1, &ekf_H, &ekf_xhat); //H*X
     Mat ekf_xhat_aux2;
-    MatCreate(&ekf_xhat_aux2, 9, 1);
+    MatCreate(&ekf_xhat_aux2, NMEASURES, 1);
     MatSub(&ekf_xhat_aux2, &ekf_Z, &ekf_xhat_aux1); //Z-H*X
     Mat ekf_xhat_aux3;
-    MatCreate(&ekf_xhat_aux3, 16, 1);
+    MatCreate(&ekf_xhat_aux3, NSTATES, 1);
     MatMultiply(&ekf_xhat_aux3, &ekf_K, &ekf_xhat_aux2); //K*(Z-H*X)
     MatAdd(&ekf_xhat, &ekf_xhat, &ekf_xhat_aux3);        //X+K*(Z-H*X)
     //状态均方误差更新
-    Mat P_EYE16;
-    MatCreate(&P_EYE16, 16, 16);
-    MatEye(&P_EYE16); //I
+    Mat P_EYE;
+    MatCreate(&P_EYE, NSTATES, NSTATES);
+    MatEye(&P_EYE); //I
     Mat ekf_Pe_aux1;
-    MatCreate(&ekf_Pe_aux1, 16, 16);
+    MatCreate(&ekf_Pe_aux1, NSTATES, NSTATES);
     MatMultiply(&ekf_Pe_aux1, &ekf_K, &ekf_H); //KH
     Mat ekf_Pe_aux2;
-    MatCreate(&ekf_Pe_aux2, 16, 16);
-    MatSub(&ekf_Pe_aux2, &P_EYE16, &ekf_Pe_aux1); //I-KH
+    MatCreate(&ekf_Pe_aux2, NSTATES, NSTATES);
+    MatSub(&ekf_Pe_aux2, &P_EYE, &ekf_Pe_aux1); //I-KH
     Mat ekf_Pe_aux3;
-    MatCreate(&ekf_Pe_aux3, 16, 16);
+    MatCreate(&ekf_Pe_aux3, NSTATES, NSTATES);
     MatMultiply(&ekf_Pe_aux3, &ekf_Pe_aux2, &ekf_P); //(I-KH)*P
     MatCopy(&ekf_P, &ekf_Pe_aux3);
     //四元数归一化
@@ -538,14 +485,14 @@ int ekf_basedon_quaternion(float dt_s,
     MatDelete(&Xdot);
     MatDelete(&F);
     MatDelete(&Ft);
-    MatDelete(&AA_Zeros16);
+    MatDelete(&AA_Zeros);
     MatDelete(&AA_a);
     MatDelete(&AA_b);
     MatDelete(&AA_c);
     MatDelete(&AA_d);
     MatDelete(&AA);
     MatDelete(&BB);
-    MatDelete(&BB_EYE32);
+    MatDelete(&BB_EYE);
     MatDelete(&PHI_K);
     MatDelete(&PHI_Kt);
     MatDelete(&BB_rightup);
@@ -565,7 +512,7 @@ int ekf_basedon_quaternion(float dt_s,
     MatDelete(&ekf_xhat_aux1);
     MatDelete(&ekf_xhat_aux2);
     MatDelete(&ekf_xhat_aux3);
-    MatDelete(&P_EYE16);
+    MatDelete(&P_EYE);
     MatDelete(&ekf_Pe_aux1);
     MatDelete(&ekf_Pe_aux2);
     MatDelete(&ekf_Pe_aux3);
