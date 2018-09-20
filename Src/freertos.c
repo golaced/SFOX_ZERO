@@ -301,7 +301,7 @@ void StartTask06BackEnd(void const * argument)
     time_consume[app_backend_time_index][0] = get_sys_time_us();
     det_t_s.det_t_app_backend_s = get_cycle_time(app_backend_time_index);
     //app_ins_thread(det_t_s.det_t_app_backend_s);
-//    app_ins_ekf_quaternion_thread(det_t_s.det_t_app_backend_s);
+    app_ins_ekf_quaternion_thread(det_t_s.det_t_app_backend_s);
     app_ctrl_thread(det_t_s.det_t_app_backend_s);
     time_consume[app_backend_time_index][1] = get_sys_time_us();
     app_backend_time_consume_us = time_consume[app_backend_time_index][1] - time_consume[app_backend_time_index][0];

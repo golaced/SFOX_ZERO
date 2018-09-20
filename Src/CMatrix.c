@@ -370,8 +370,7 @@ Mat * MatBlockCompose(Mat *BIG, Mat *Blocks, const int M, const int N)
 	{
 		for (int i = 0; i < M; i++)//row
 		{
-			printf("Blocks[%d].col:%d\t Blocks[%d].col:%d\n", j, Blocks[j].col, i*N+j, Blocks[i*N+j].col);
-			if (Blocks[j].col != Blocks[i*N+j].col)
+			if (Blocks[j].col != Blocks[i*N + j].col)
 			{
 				MatException();
 			}
@@ -455,7 +454,7 @@ int MatSetValAt(Mat * matA, int M, int N, MatDataType Val)
 Mat * MatCopy(Mat * matA, Mat * matB)
 {
 	//判断矩阵是否存在
-	if ((MatIsValid(matA) != 0) || (MatIsValid(matB) != 0))	MatException();
+	if ((MatIsValid(matA) != 0) || (MatIsValid(matA) != 0))	MatException();
 	//判断矩阵维数是否相同
 	if ((matA->row != matB->row) || (matA->col != matB->col))	MatException();
 	for (int i = 0; i < matB->row; i++)
