@@ -69,13 +69,8 @@
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
-osThreadId myTask02LEDHandle;
-osThreadId myTask03COMHandle;
-osThreadId myTask04MPU9250Handle;
-osThreadId myTask05MS5803Handle;
-osThreadId myTask06BackEndHandle;
-osThreadId myTask07UWBHandle;
-osThreadId myTask08GPSHandle;
+osThreadId myTask02NormalHandle;
+osThreadId myTask01RealTimHandle;
 osMessageQId myQueue02GPSM8NToInsHandle;
 osMessageQId myQueue01MPU9250ToANOHandle;
 osMessageQId myQueue03MPU9250ToInsHandle;
@@ -93,13 +88,8 @@ osSemaphoreId myBinarySem07GPSUpdateHandle;
 
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const * argument);
-void StartTask02LED(void const * argument);
-void StartTask03COM(void const * argument);
-void StartTask04MPU9250(void const * argument);
-void StartTask05MS5803(void const * argument);
-void StartTask06BackEnd(void const * argument);
-void StartTask07UWB(void const * argument);
-void StartTask08GPS(void const * argument);
+void StartTask02Normal(void const * argument);
+void StartTask01RealTime(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -196,33 +186,13 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-  /* definition and creation of myTask02LED */
-  osThreadDef(myTask02LED, StartTask02LED, osPriorityNormal, 0, 128);
-  myTask02LEDHandle = osThreadCreate(osThread(myTask02LED), NULL);
+  /* definition and creation of myTask02Normal */
+  osThreadDef(myTask02Normal, StartTask02Normal, osPriorityNormal, 0, 1024);
+  myTask02NormalHandle = osThreadCreate(osThread(myTask02Normal), NULL);
 
-  /* definition and creation of myTask03COM */
-  osThreadDef(myTask03COM, StartTask03COM, osPriorityNormal, 0, 256);
-  myTask03COMHandle = osThreadCreate(osThread(myTask03COM), NULL);
-
-  /* definition and creation of myTask04MPU9250 */
-  osThreadDef(myTask04MPU9250, StartTask04MPU9250, osPriorityNormal, 0, 512);
-  myTask04MPU9250Handle = osThreadCreate(osThread(myTask04MPU9250), NULL);
-
-  /* definition and creation of myTask05MS5803 */
-  osThreadDef(myTask05MS5803, StartTask05MS5803, osPriorityNormal, 0, 128);
-  myTask05MS5803Handle = osThreadCreate(osThread(myTask05MS5803), NULL);
-
-  /* definition and creation of myTask06BackEnd */
-  osThreadDef(myTask06BackEnd, StartTask06BackEnd, osPriorityRealtime, 0, 1024);
-  myTask06BackEndHandle = osThreadCreate(osThread(myTask06BackEnd), NULL);
-
-  /* definition and creation of myTask07UWB */
-  osThreadDef(myTask07UWB, StartTask07UWB, osPriorityNormal, 0, 128);
-  myTask07UWBHandle = osThreadCreate(osThread(myTask07UWB), NULL);
-
-  /* definition and creation of myTask08GPS */
-  osThreadDef(myTask08GPS, StartTask08GPS, osPriorityNormal, 0, 256);
-  myTask08GPSHandle = osThreadCreate(osThread(myTask08GPS), NULL);
+  /* definition and creation of myTask01RealTim */
+  osThreadDef(myTask01RealTim, StartTask01RealTime, osPriorityRealtime, 0, 2048);
+  myTask01RealTimHandle = osThreadCreate(osThread(myTask01RealTim), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -262,124 +232,41 @@ void StartDefaultTask(void const * argument)
   /* USER CODE END StartDefaultTask */
 }
 
-/* StartTask02LED function */
-void StartTask02LED(void const * argument)
+/* StartTask02Normal function */
+void StartTask02Normal(void const * argument)
 {
-  /* USER CODE BEGIN StartTask02LED */
+  /* USER CODE BEGIN StartTask02Normal */
   /* Infinite loop */
   for(;;)
   {
-    //app_led_thread();
-  }
-  /* USER CODE END StartTask02LED */
-}
-
-/* StartTask03COM function */
-void StartTask03COM(void const * argument)
-{
-  /* USER CODE BEGIN StartTask03COM */
-  /* Infinite loop */
-  for(;;)
-  {
-    time_consume[app_ano_time_index][0] = get_sys_time_us();
-    det_t_s.det_t_app_ano_s = get_cycle_time(app_ano_time_index);
+    //
     ano_process(0);
-    MS5803_process();
-    app_led_thread();
-    //app_uwb_thread();
-    //app_ros_thread();
-    gps_m8n_thread(det_t_s.det_t_gps_m8n_s);
-    time_consume[app_ano_time_index][1] = get_sys_time_us();
-    app_ano_time_consume_us = time_consume[app_ano_time_index][1] - time_consume[app_ano_time_index][0];
-    osDelay(10);
+    //
+    osDelay(20);
   }
-  /* USER CODE END StartTask03COM */
+  /* USER CODE END StartTask02Normal */
 }
 
-/* StartTask04MPU9250 function */
-void StartTask04MPU9250(void const * argument)
+/* StartTask01RealTime function */
+void StartTask01RealTime(void const * argument)
 {
-  /* USER CODE BEGIN StartTask04MPU9250 */
+  /* USER CODE BEGIN StartTask01RealTime */
   /* Infinite loop */
   for(;;)
   {
-    time_consume[mpu9250_time_index][0] = get_sys_time_us();
-    det_t_s.det_t_mpu9250_s = get_cycle_time(mpu9250_time_index);
-    //MPU9250_process();
-    time_consume[mpu9250_time_index][1] = get_sys_time_us();
-    mpu9250_time_consume_us = time_consume[mpu9250_time_index][1] - time_consume[mpu9250_time_index][0];
-    osDelay(5);
-  }
-  /* USER CODE END StartTask04MPU9250 */
-}
+    //
 
-/* StartTask05MS5803 function */
-void StartTask05MS5803(void const * argument)
-{
-  /* USER CODE BEGIN StartTask05MS5803 */
-  /* Infinite loop */
-  for(;;)
-  {
-    //MS5803_process();
-    osDelay(10);
-  }
-  /* USER CODE END StartTask05MS5803 */
-}
-
-/* StartTask06BackEnd function */
-void StartTask06BackEnd(void const * argument)
-{
-  /* USER CODE BEGIN StartTask06BackEnd */
-  /* Infinite loop */
-  for(;;)
-  {
-    time_consume[app_backend_time_index][0] = get_sys_time_us();
-    det_t_s.det_t_app_backend_s = get_cycle_time(app_backend_time_index);
-    //读取惯导数据
+    //
     MPU9250_process();
-    //导航解算
-    app_ins_ekf_quaternion_thread(det_t_s.det_t_app_backend_s);
-    //控制
-    //app_ctrl_thread(det_t_s.det_t_app_backend_s);
-    time_consume[app_backend_time_index][1] = get_sys_time_us();
-    app_backend_time_consume_us = time_consume[app_backend_time_index][1] - time_consume[app_backend_time_index][0];
+    //
+    app_ins_ekf_quaternion_thread(float dt_s);
+    //
+    app_ctrl_thread(float dT);
+    //
+
     osDelay(10);
   }
-  /* USER CODE END StartTask06BackEnd */
-}
-
-/* StartTask07UWB function */
-void StartTask07UWB(void const * argument)
-{
-  /* USER CODE BEGIN StartTask07UWB */
-  /* Infinite loop */
-  for(;;)
-  {
-    time_consume[app_uwb_time_index][0] = get_sys_time_us();
-    det_t_s.det_t_app_uwb_s = get_cycle_time(app_uwb_time_index);
-    //app_uwb_thread();
-    time_consume[app_uwb_time_index][1] = get_sys_time_us();
-    app_uwb_time_consume_us = time_consume[app_uwb_time_index][1] - time_consume[app_uwb_time_index][0];
-    osDelay(50);
-  }
-  /* USER CODE END StartTask07UWB */
-}
-
-/* StartTask08GPS function */
-void StartTask08GPS(void const * argument)
-{
-  /* USER CODE BEGIN StartTask08GPS */
-  /* Infinite loop */
-  for(;;)
-  {
-    time_consume[gps_m8n_time_index][0] = get_sys_time_us();
-    det_t_s.det_t_gps_m8n_s = get_cycle_time(gps_m8n_time_index);
-    //gps_m8n_thread(det_t_s.det_t_gps_m8n_s);
-    time_consume[gps_m8n_time_index][1] = get_sys_time_us();
-    gps_m8n_time_consume_us = time_consume[gps_m8n_time_index][1] - time_consume[gps_m8n_time_index][0];
-    osDelay(50);
-  }
-  /* USER CODE END StartTask08GPS */
+  /* USER CODE END StartTask01RealTime */
 }
 
 /* USER CODE BEGIN Application */
