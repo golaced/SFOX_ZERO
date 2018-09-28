@@ -106,10 +106,10 @@ int ANO_sending(int mode)
 			int16_t data6=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyroz_raw_dps);
 
 			int16_t data7=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
-			int16_t data8=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
-			//int16_t data9=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
+			int16_t data8=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magy_raw_uT;
+			int16_t data9=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magz_raw_uT;
                         
-                        int16_t data9 = (int16_t)(det_t_s.det_t_app_backend_s*1000);
+                        //int16_t data9 = (int16_t)(det_t_s.det_t_app_backend_s*1000);
 
 			//float dataA,dataB,dataC;
 			//
@@ -117,7 +117,7 @@ int ANO_sending(int mode)
 				(int16_t)(data1), (int16_t)(data2), (int16_t)(data3),
 				(int16_t)(data4), (int16_t)(data5), (int16_t)(data6),
 				(int16_t)(data7), (int16_t)(data8), (int16_t)(data9),
-				(float)(roll_deg), (float)(pitch_deg), (float)(0),
+				(float)(roll_deg), (float)(pitch_deg), (float)(yaw_deg),
 				(int32_t)(15), (uint8_t)(13), (uint8_t)(14));
 		}
 	}

@@ -472,7 +472,8 @@ int ekf_basedon_quaternion(float dt_s,
     //输出结果
     roll_deg = 180 / PI * atan2(2*(q2*q3 + q1*q0), 1-2*(q1*q1 + q2*q2));
     pitch_deg = 180 / PI * asin(-2*(q1*q3 - q2*q0));
-    yaw_deg = 180 / PI * atan2(2*(q1*q2 + q3*q0), 1-2*(q2*q2 + q3*q3)); // -180 <= yaw <= 180
+    //yaw_deg = 180 / PI * atan2(2*(q1*q2 + q3*q0), 1-2*(q2*q2 + q3*q3)); // -180 <= yaw <= 180
+    yaw_deg = 180 / PI *atan2(my,mx);
 
     //回收变量
     MatDelete(&ekf_Q);

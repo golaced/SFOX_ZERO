@@ -71,6 +71,8 @@
 osThreadId defaultTaskHandle;
 osThreadId myTask02NormalHandle;
 osThreadId myTask01RealTimHandle;
+osThreadId myTask03LEDHandle;
+osThreadId myTask04COMHandle;
 osMessageQId myQueue02GPSM8NToInsHandle;
 osMessageQId myQueue01MPU9250ToANOHandle;
 osMessageQId myQueue03MPU9250ToInsHandle;
@@ -90,6 +92,8 @@ osSemaphoreId myBinarySem07GPSUpdateHandle;
 void StartDefaultTask(void const * argument);
 void StartTask02Normal(void const * argument);
 void StartTask01RealTime(void const * argument);
+void StartTask03LED(void const * argument);
+void StartTask04COM(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -187,12 +191,20 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of myTask02Normal */
-  osThreadDef(myTask02Normal, StartTask02Normal, osPriorityNormal, 0, 1024);
+  osThreadDef(myTask02Normal, StartTask02Normal, osPriorityNormal, 0, 512);
   myTask02NormalHandle = osThreadCreate(osThread(myTask02Normal), NULL);
 
   /* definition and creation of myTask01RealTim */
-  osThreadDef(myTask01RealTim, StartTask01RealTime, osPriorityRealtime, 0, 2048);
+  osThreadDef(myTask01RealTim, StartTask01RealTime, osPriorityAboveNormal, 0, 2048);
   myTask01RealTimHandle = osThreadCreate(osThread(myTask01RealTim), NULL);
+
+  /* definition and creation of myTask03LED */
+  osThreadDef(myTask03LED, StartTask03LED, osPriorityIdle, 0, 128);
+  myTask03LEDHandle = osThreadCreate(osThread(myTask03LED), NULL);
+
+  /* definition and creation of myTask04COM */
+  osThreadDef(myTask04COM, StartTask04COM, osPriorityIdle, 0, 128);
+  myTask04COMHandle = osThreadCreate(osThread(myTask04COM), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -227,7 +239,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    //osDelay(1);
+    osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -239,10 +251,20 @@ void StartTask02Normal(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    //时间统计
+    time_consume[normal_task_time_index][0] = get_sys_time_us();
+    det_t_s.det_t_normal_task_s = get_cycle_time(normal_task_time_index);
+    //GPS
+    det_t_s.det_t_gps_m8n_s = get_cycle_time(gps_m8n_task_time_index);
+    gps_m8n_thread(det_t_s.det_t_gps_m8n_s);
     //
-    ano_process(0);
+    MS5803_process();
+    //接收UWB信息
+    //app_uwb_thread();
     //
-    osDelay(20);
+    time_consume[normal_task_time_index][1] = get_sys_time_us();
+    normal_time_consume_us = time_consume[normal_task_time_index][1] - time_consume[normal_task_time_index][0];
+    osDelay(20-(int)(normal_time_consume_us*0.001f));
   }
   /* USER CODE END StartTask02Normal */
 }
@@ -254,19 +276,53 @@ void StartTask01RealTime(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    //
-
-    //
+    //时间统计[
+    time_consume[realtime_task_time_index][0] = get_sys_time_us();
+    det_t_s.det_t_realtime_task_s = get_cycle_time(realtime_task_time_index);
+    //惯导读取任务
+    det_t_s.det_t_mpu9250_process_s = get_cycle_time(mpu9250_process_time_index);
     MPU9250_process();
-    //
-    app_ins_ekf_quaternion_thread(float dt_s);
-    //
-    app_ctrl_thread(float dT);
-    //
-
-    osDelay(10);
+    //导航解算任务
+    det_t_s.det_t_app_ins_s = get_cycle_time(app_ins_time_index);
+    app_ins_ekf_quaternion_thread(det_t_s.det_t_app_ins_s);
+    //飞行控制任务
+    det_t_s.det_t_app_ctrl_s = get_cycle_time(app_ctrl_time_index);
+    //app_ctrl_thread(det_t_s.det_t_app_ctrl_s);
+    //时间统计]
+    time_consume[realtime_task_time_index][1] = get_sys_time_us();
+    real_time_consume_us = time_consume[realtime_task_time_index][1] - time_consume[realtime_task_time_index][0];
+    osDelay(10-(int)(real_time_consume_us*0.001f));
   }
   /* USER CODE END StartTask01RealTime */
+}
+
+/* StartTask03LED function */
+void StartTask03LED(void const * argument)
+{
+  /* USER CODE BEGIN StartTask03LED */
+  /* Infinite loop */
+  for(;;)
+  {
+    app_led_thread();
+    osDelay(1);
+  }
+  /* USER CODE END StartTask03LED */
+}
+
+/* StartTask04COM function */
+void StartTask04COM(void const * argument)
+{
+  /* USER CODE BEGIN StartTask04COM */
+  /* Infinite loop */
+  for(;;)
+  {
+    //
+    ano_process(0);
+    //与树莓派ROS通信
+    //app_ros_thread();
+    osDelay(20);
+  }
+  /* USER CODE END StartTask04COM */
 }
 
 /* USER CODE BEGIN Application */

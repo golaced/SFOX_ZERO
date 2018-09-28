@@ -13,31 +13,32 @@ enum
 
 enum
 {
-  app_ano_time_index = 0,
-  app_backend_time_index,
-  mpu9250_time_index,
-  app_uwb_time_index,
-  gps_m8n_time_index,
+  normal_task_time_index = 0,
+  realtime_task_time_index,
+  gps_m8n_task_time_index,
   gps_m8n_update_time_index,
+  mpu9250_process_time_index,
+  app_ins_time_index,
+  app_ctrl_time_index,
 };
 
 typedef struct
 {
-	float det_t_app_ano_s;
-  float det_t_app_backend_s;
-  float det_t_mpu9250_s;
-  float det_t_app_uwb_s;
+  float det_t_normal_task_s;
+  float det_t_realtime_task_s;
   float det_t_gps_m8n_s;
-	float det_t_gps_m8n_update_s;
+  float det_t_gps_m8n_update_s;
+  float det_t_mpu9250_process_s;
+  float det_t_app_ins_s;
+  float det_t_app_ctrl_s;
+
 }Det_t;
 
 extern Det_t det_t_s;
 extern unsigned long long time_consume[GET_TIME_NUM][2];
-extern int app_ano_time_consume_us;
-extern int app_backend_time_consume_us;
-extern int mpu9250_time_consume_us;
-extern int app_uwb_time_consume_us;
-extern int gps_m8n_time_consume_us;
+extern int normal_time_consume_us;
+extern int real_time_consume_us;
+
 
 extern volatile unsigned long long sysTickUptime;
 extern float cycle_T[20][3];

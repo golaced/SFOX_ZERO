@@ -1,6 +1,7 @@
 #include "flash_on_chip.h"
 #include "app_ano.h"
 #include "mpu9250.h"
+#include "cmsis_os.h"
 
 FLASH_EraseInitTypeDef EraseInitStruct;
 static uint32_t GetSector(uint32_t Address);
@@ -293,7 +294,7 @@ uint8_t UpdateTheFLASH(uint32_t Address, uint8_t *buf, short size)
 	while (number<size)
 	{
 		number++;
-		HAL_Delay(1);
+		osDelay(1);
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, Address, *buf) == HAL_OK)
 		{
 			Address = Address + 1;
@@ -319,7 +320,7 @@ void ReadTheFLASH(uint32_t Address, uint8_t *buf, short size)
 	short number = 0;
 	while (number < size)
 	{
-		HAL_Delay(1);
+		osDelay(1);
 		buf[number] = *(__IO uint8_t *)Address;
 		Address = Address + 1;
 		number++;

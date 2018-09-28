@@ -410,8 +410,8 @@ void MPU9250_data_push(void)
 	mpu9250.gyroz_raw_dps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[12], MPU9250_data_buffer[13]))*MPU9250G_1000dps;
 
 	//NOTE:mag data's order is Y - X - Z
-	mpu9250.magy_raw_uT = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[16], MPU9250_data_buffer[15]))*MPU9250M_4800uT;
-	mpu9250.magx_raw_uT = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[18], MPU9250_data_buffer[17]))*MPU9250M_4800uT;
+	mpu9250.magy_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[16], MPU9250_data_buffer[15]))*MPU9250M_4800uT;
+	mpu9250.magx_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[18], MPU9250_data_buffer[17]))*MPU9250M_4800uT;
 	mpu9250.magz_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[20], MPU9250_data_buffer[19]))*MPU9250M_4800uT;
 
 	mpu9250.magx_raw_uT = mpu9250.magx_gain * (mpu9250.magx_raw_uT - mpu9250.magx_offset);
@@ -453,7 +453,7 @@ void MPU9250_process(void)
     if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
     {
       MPU9250MagCalibrateStart = 0;
-      osSemaphoreRelease(myBinarySem02LED1ONHandle);// 
+      osSemaphoreRelease(myBinarySem03LED2ONHandle);// 
       MPU9250_mag_calibrate(MPU9250MagCalibrateStart, mpu9250.magx_raw_uT,mpu9250.magy_raw_uT,mpu9250.magz_raw_uT);
     }
   }

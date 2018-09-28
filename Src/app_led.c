@@ -18,9 +18,20 @@ void app_led_thread(void)
   }
   if(osOK == osSemaphoreWait(myBinarySem03LED2ONHandle,0))
   {
-    led_two_on();
-    osDelay(3000);
-    led_two_off();
+    while(1)
+    {
+      led_all_on();
+      osDelay(100);
+      if(osOK == osSemaphoreWait(myBinarySem03LED2ONHandle,0))
+      {
+        led_all_off();
+        return;
+      }
+        
+    }
+    //led_two_on();
+    //osDelay(3000);
+    //led_two_off();
     //return;
   }
   if(osOK == osSemaphoreWait(myBinarySem05LED1PulsateHandle,0))
