@@ -1223,6 +1223,9 @@
                 <name>$PROJ_DIR$\..\Src\flash_on_chip.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Src\gps_m8n.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Src\motor_pwm.c</name>
             </file>
             <file>

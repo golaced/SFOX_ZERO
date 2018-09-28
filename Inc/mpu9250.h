@@ -168,17 +168,26 @@ extern SPI_HandleTypeDef hspi3;
 
 
 extern SPI_HandleTypeDef *MPU9250_Handler;
-extern char mpu_data_ok;
-extern uint8_t MPU9250_data_buffer[28];//9250ԭʼ����
 
-extern float accx_raw_mps, accy_raw_mps, accz_raw_mps;
-extern float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
-extern float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
-extern float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
-extern float magx_raw_uT, magy_raw_uT, magz_raw_uT;
-extern float magx_offset,magy_offset,magz_offset;
-extern float magx_gain,magy_gain,magz_gain;
-extern int MPU9250_ERROR;
+typedef struct{
+    float accx_raw_mps, accy_raw_mps, accz_raw_mps;
+    float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
+    float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
+    float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
+    float magx_raw_uT, magy_raw_uT, magz_raw_uT;
+    float magx_offset,magy_offset,magz_offset;
+    float magx_gain,magy_gain,magz_gain;
+}_MPU9250;
+
+extern _MPU9250 mpu9250;
+
+// extern float accx_raw_mps, accy_raw_mps, accz_raw_mps;
+// extern float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
+// extern float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
+// extern float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
+// extern float magx_raw_uT, magy_raw_uT, magz_raw_uT;
+// extern float magx_offset,magy_offset,magz_offset;
+// extern float magx_gain,magy_gain,magz_gain;
 
 
 uint8_t MPU9250_ReadReg(uint8_t ReadAddr);

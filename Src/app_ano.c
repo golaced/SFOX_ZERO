@@ -11,6 +11,7 @@
 #include "cmsis_os.h"
 #include "uwb1000.h"
 #include "app_ros.h"
+#include "time.h"
 
 #define BYTE0(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 0) )
 #define BYTE1(dwTemp)       ( *( (uint8_t *)(&dwTemp) + 1) )
@@ -22,6 +23,8 @@
 
 extern osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
 extern osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
+
+extern osMessageQId myQueue01MPU9250ToANOHandle;
 
 static uint8_t ano_data_to_send[100];	//
 static uint8_t RxBuffer[50];		//
@@ -91,13 +94,29 @@ int ANO_sending(int mode)
 	{
 		if ((get_data_from_ANO == 0) && (send_pid_para == 0))
 		{
+			osEvent mpu9250_evt;
+			mpu9250_evt = osMessageGet(myQueue01MPU9250ToANOHandle,0);
+			//
+			int16_t data1=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accx_raw_mps);
+			int16_t data2=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accy_raw_mps);
+			int16_t data3=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accz_raw_mps);
+
+			int16_t data4=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyrox_raw_dps);
+			int16_t data5=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyroy_raw_dps);
+			int16_t data6=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyroz_raw_dps);
+
+			int16_t data7=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
+			int16_t data8=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
+			//int16_t data9=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
+                        
+                        int16_t data9 = (int16_t)(det_t_s.det_t_app_backend_s*1000);
+
+			//float dataA,dataB,dataC;
+			//
 			ANO_send_15_data(
-				(int16_t)(1000*accx_raw_mps), (int16_t)(1000*accy_raw_mps), (int16_t)(accz_raw_mps),
-				(int16_t)(gyrox_raw_dps), (int16_t)(gyroy_raw_dps), (int16_t)(gyroz_raw_dps),
-				(int16_t)(magx_raw_uT), (int16_t)(magy_raw_uT), (int16_t)(magz_raw_uT),
-				// (int16_t)(temp1*100), (int16_t)(temp2*100), (int16_t)(temp3*100),
-				// (int16_t)(temp4*100), (int16_t)(temp5*100), (int16_t)(temp6*100),
-				// (int16_t)(magx_raw_uT), (int16_t)(magy_raw_uT), (int16_t)(temp0),
+				(int16_t)(data1), (int16_t)(data2), (int16_t)(data3),
+				(int16_t)(data4), (int16_t)(data5), (int16_t)(data6),
+				(int16_t)(data7), (int16_t)(data8), (int16_t)(data9),
 				(float)(roll_deg), (float)(pitch_deg), (float)(0),
 				(int32_t)(15), (uint8_t)(13), (uint8_t)(14));
 		}

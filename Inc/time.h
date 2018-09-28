@@ -17,6 +17,8 @@ enum
   app_backend_time_index,
   mpu9250_time_index,
   app_uwb_time_index,
+  gps_m8n_time_index,
+  gps_m8n_update_time_index,
 };
 
 typedef struct
@@ -25,14 +27,17 @@ typedef struct
   float det_t_app_backend_s;
   float det_t_mpu9250_s;
   float det_t_app_uwb_s;
-	
+  float det_t_gps_m8n_s;
+	float det_t_gps_m8n_update_s;
 }Det_t;
+
 extern Det_t det_t_s;
 extern unsigned long long time_consume[GET_TIME_NUM][2];
 extern int app_ano_time_consume_us;
 extern int app_backend_time_consume_us;
 extern int mpu9250_time_consume_us;
 extern int app_uwb_time_consume_us;
+extern int gps_m8n_time_consume_us;
 
 extern volatile unsigned long long sysTickUptime;
 extern float cycle_T[20][3];

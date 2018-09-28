@@ -3,6 +3,14 @@
 #include "CMatrix.h"
 #include <math.h>
 #include <stdlib.h>
+#include "cmsis_os.h"
+#include "gps_m8n.h"
+#include "mpu9250.h"
+
+extern osMessageQId myQueue02GPSM8NToInsHandle;
+extern osMessageQId myQueue03MPU9250ToInsHandle;
+osEvent gps_m8n_evt;
+osEvent mpu9250_evt;
 
 //全局变量
 float roll_deg,pitch_deg,yaw_deg;
@@ -57,26 +65,29 @@ int app_ins_ekf_quaternion_thread(float dt_s)
 
 int obtain_sensors_data(void)
 {
-    accx_mps = accx_raw_mps;    
-    accy_mps = accy_raw_mps;    
-    accz_mps = accz_raw_mps;
+    gps_m8n_evt = osMessageGet(myQueue02GPSM8NToInsHandle,0);
+    if(gps_m8n_evt.status == osEventMessage)
+    {
+        pos_north = (*((_GPS_M8N*)gps_m8n_evt.value.v)).pos_north;
+        pos_east = (*((_GPS_M8N*)gps_m8n_evt.value.v)).pos_east;
+        pos_alt = (*((_GPS_M8N*)gps_m8n_evt.value.v)).alt;
+    }
+    
+    mpu9250_evt = osMessageGet(myQueue03MPU9250ToInsHandle,0);
+    if(mpu9250_evt.status == osEventMessage)
+    {
+        accx_mps = (*((_MPU9250*)mpu9250_evt.value.v)).accx_raw_mps;    
+        accy_mps = (*((_MPU9250*)mpu9250_evt.value.v)).accy_raw_mps;    
+        accz_mps = (*((_MPU9250*)mpu9250_evt.value.v)).accz_raw_mps;
 
-    gyrox_rps = gyrox_raw_dps * DEG_TO_RAD; 
-    gyroy_rps = gyroy_raw_dps * DEG_TO_RAD; 
-    gyroz_rps = gyroz_raw_dps * DEG_TO_RAD; 
+        gyrox_rps = (*((_MPU9250*)mpu9250_evt.value.v)).gyrox_raw_dps * DEG_TO_RAD; 
+        gyroy_rps = (*((_MPU9250*)mpu9250_evt.value.v)).gyroy_raw_dps * DEG_TO_RAD; 
+        gyroz_rps = (*((_MPU9250*)mpu9250_evt.value.v)).gyroz_raw_dps * DEG_TO_RAD; 
 
-    magx_ut = magx_raw_uT;
-    magy_ut = magy_raw_uT;
-    magz_ut = magz_raw_uT;
-
-    pos_north = 0.0f;
-    pos_east = 0.0f;
-    pos_alt = 0.0f;
-
-    vel_north = 0.0f;
-    vel_east = 0.0f;
-    vel_down = 0.0f;
-
+        magx_ut = (*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
+        magy_ut = (*((_MPU9250*)mpu9250_evt.value.v)).magy_raw_uT;
+        magz_ut = (*((_MPU9250*)mpu9250_evt.value.v)).magz_raw_uT;
+    }
     return 0;
 }
 

@@ -2,7 +2,7 @@
 #include "app_ano.h"
 #include "usart_cfg.h"
 #include "app_ros.h"
-#include "uwb1000.h"
+#include "gps_m8n.h"
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
@@ -36,30 +36,31 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if(huart->Instance==USART1)
   {
-	  HAL_UART_Receive_IT(&huart1,aRxBuffer1,1);//¿ªÆôÏÂÒ»´Î½ÓÊÕÖÐ¶Ï
+	  HAL_UART_Receive_IT(&huart1,aRxBuffer1,1);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
 	  ANO_data_receive_prepara(aRxBuffer1[0]);
   }
   if(huart->Instance == USART2)
   {
-	  HAL_UART_Receive_IT(&huart2,aRxBuffer2,1);//¿ªÆôÏÂÒ»´Î½ÓÊÕÖÐ¶Ï
-          uwb1000_buffer_fill(aRxBuffer2[0]);
+	HAL_UART_Receive_IT(&huart2,aRxBuffer2,1);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+    //uwb1000_buffer_fill(aRxBuffer2[0]);
+	gps_m8n_receive(aRxBuffer2[0]);
   }
   if(huart->Instance == USART3)
   {
-	  HAL_UART_Receive_IT(&huart3,aRxBuffer3,1);//¿ªÆôÏÂÒ»´Î½ÓÊÕÖÐ¶Ï
+	  HAL_UART_Receive_IT(&huart3,aRxBuffer3,1);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
   }
   if(huart->Instance == UART5)
   {
-	  HAL_UART_Receive_IT(&huart5,aRxBuffer5,1);//¿ªÆôÏÂÒ»´Î½ÓÊÕÖÐ¶Ï
+	  HAL_UART_Receive_IT(&huart5,aRxBuffer5,1);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
           ros_data_receive_prepara(aRxBuffer5[0]);
   }
   if(huart->Instance == USART6)
   {
-	  HAL_UART_Receive_IT(&huart6,aRxBuffer6,1);//¿ªÆôÏÂÒ»´Î½ÓÊÕÖÐ¶Ï
+	  HAL_UART_Receive_IT(&huart6,aRxBuffer6,1);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
   }
 }
 
-//DMA·¢ËÍº¯Êý
+//DMAï¿½ï¿½ï¿½Íºï¿½ï¿½ï¿½
 void USART1_DMA_send_data(uint8_t *pdata, uint16_t Length)
 {
 	HAL_UART_Transmit_DMA(&huart1, pdata, Length);

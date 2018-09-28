@@ -8,6 +8,7 @@ int app_ano_time_consume_us;
 int app_backend_time_consume_us;
 int mpu9250_time_consume_us;
 int app_uwb_time_consume_us;
+int gps_m8n_time_consume_us;
 Det_t det_t_s;
 
 float get_cycle_time(int item)

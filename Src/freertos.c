@@ -64,6 +64,7 @@
 #include "app_ros.h"
 #include "app_uwb.h"
 #include "app_ins_ekf_quaternion.h"
+#include "gps_m8n.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -74,12 +75,17 @@ osThreadId myTask04MPU9250Handle;
 osThreadId myTask05MS5803Handle;
 osThreadId myTask06BackEndHandle;
 osThreadId myTask07UWBHandle;
+osThreadId myTask08GPSHandle;
+osMessageQId myQueue02GPSM8NToInsHandle;
+osMessageQId myQueue01MPU9250ToANOHandle;
+osMessageQId myQueue03MPU9250ToInsHandle;
 osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
 osSemaphoreId myBinarySem02LED1ONHandle;
 osSemaphoreId myBinarySem03LED2ONHandle;
 osSemaphoreId myBinarySem05LED1PulsateHandle;
 osSemaphoreId myBinarySem06LED2PulsateHandle;
 osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
+osSemaphoreId myBinarySem07GPSUpdateHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -93,6 +99,7 @@ void StartTask04MPU9250(void const * argument);
 void StartTask05MS5803(void const * argument);
 void StartTask06BackEnd(void const * argument);
 void StartTask07UWB(void const * argument);
+void StartTask08GPS(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -166,6 +173,10 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(myBinarySem04MPU9250MagCalibrate);
   myBinarySem04MPU9250MagCalibrateHandle = osSemaphoreCreate(osSemaphore(myBinarySem04MPU9250MagCalibrate), 1);
 
+  /* definition and creation of myBinarySem07GPSUpdate */
+  osSemaphoreDef(myBinarySem07GPSUpdate);
+  myBinarySem07GPSUpdateHandle = osSemaphoreCreate(osSemaphore(myBinarySem07GPSUpdate), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   osSemaphoreWait(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle,0);
@@ -186,32 +197,52 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of myTask02LED */
-  osThreadDef(myTask02LED, StartTask02LED, osPriorityIdle, 0, 128);
+  osThreadDef(myTask02LED, StartTask02LED, osPriorityNormal, 0, 128);
   myTask02LEDHandle = osThreadCreate(osThread(myTask02LED), NULL);
 
   /* definition and creation of myTask03COM */
-  osThreadDef(myTask03COM, StartTask03COM, osPriorityIdle, 0, 256);
+  osThreadDef(myTask03COM, StartTask03COM, osPriorityNormal, 0, 256);
   myTask03COMHandle = osThreadCreate(osThread(myTask03COM), NULL);
 
   /* definition and creation of myTask04MPU9250 */
-  osThreadDef(myTask04MPU9250, StartTask04MPU9250, osPriorityIdle, 0, 128);
+  osThreadDef(myTask04MPU9250, StartTask04MPU9250, osPriorityNormal, 0, 512);
   myTask04MPU9250Handle = osThreadCreate(osThread(myTask04MPU9250), NULL);
 
   /* definition and creation of myTask05MS5803 */
-  osThreadDef(myTask05MS5803, StartTask05MS5803, osPriorityIdle, 0, 128);
+  osThreadDef(myTask05MS5803, StartTask05MS5803, osPriorityNormal, 0, 128);
   myTask05MS5803Handle = osThreadCreate(osThread(myTask05MS5803), NULL);
 
   /* definition and creation of myTask06BackEnd */
-  osThreadDef(myTask06BackEnd, StartTask06BackEnd, osPriorityIdle, 0, 1024);
+  osThreadDef(myTask06BackEnd, StartTask06BackEnd, osPriorityRealtime, 0, 1024);
   myTask06BackEndHandle = osThreadCreate(osThread(myTask06BackEnd), NULL);
 
   /* definition and creation of myTask07UWB */
-  osThreadDef(myTask07UWB, StartTask07UWB, osPriorityIdle, 0, 128);
+  osThreadDef(myTask07UWB, StartTask07UWB, osPriorityNormal, 0, 128);
   myTask07UWBHandle = osThreadCreate(osThread(myTask07UWB), NULL);
+
+  /* definition and creation of myTask08GPS */
+  osThreadDef(myTask08GPS, StartTask08GPS, osPriorityNormal, 0, 256);
+  myTask08GPSHandle = osThreadCreate(osThread(myTask08GPS), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the queue(s) */
+  /* definition and creation of myQueue02GPSM8NToIns */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(myQueue02GPSM8NToIns, 1, uint32_t);
+  myQueue02GPSM8NToInsHandle = osMessageCreate(osMessageQ(myQueue02GPSM8NToIns), NULL);
+
+  /* definition and creation of myQueue01MPU9250ToANO */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(myQueue01MPU9250ToANO, 1, uint32_t);
+  myQueue01MPU9250ToANOHandle = osMessageCreate(osMessageQ(myQueue01MPU9250ToANO), NULL);
+
+  /* definition and creation of myQueue03MPU9250ToIns */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(myQueue03MPU9250ToIns, 1, uint32_t);
+  myQueue03MPU9250ToInsHandle = osMessageCreate(osMessageQ(myQueue03MPU9250ToIns), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -226,7 +257,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    //osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -238,7 +269,7 @@ void StartTask02LED(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    app_led_thread();
+    //app_led_thread();
   }
   /* USER CODE END StartTask02LED */
 }
@@ -253,7 +284,11 @@ void StartTask03COM(void const * argument)
     time_consume[app_ano_time_index][0] = get_sys_time_us();
     det_t_s.det_t_app_ano_s = get_cycle_time(app_ano_time_index);
     ano_process(0);
-    app_ros_thread();
+    MS5803_process();
+    app_led_thread();
+    //app_uwb_thread();
+    //app_ros_thread();
+    gps_m8n_thread(det_t_s.det_t_gps_m8n_s);
     time_consume[app_ano_time_index][1] = get_sys_time_us();
     app_ano_time_consume_us = time_consume[app_ano_time_index][1] - time_consume[app_ano_time_index][0];
     osDelay(10);
@@ -270,10 +305,10 @@ void StartTask04MPU9250(void const * argument)
   {
     time_consume[mpu9250_time_index][0] = get_sys_time_us();
     det_t_s.det_t_mpu9250_s = get_cycle_time(mpu9250_time_index);
-    MPU9250_process();
+    //MPU9250_process();
     time_consume[mpu9250_time_index][1] = get_sys_time_us();
     mpu9250_time_consume_us = time_consume[mpu9250_time_index][1] - time_consume[mpu9250_time_index][0];
-    osDelay(1);
+    osDelay(5);
   }
   /* USER CODE END StartTask04MPU9250 */
 }
@@ -285,7 +320,7 @@ void StartTask05MS5803(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    MS5803_process();
+    //MS5803_process();
     osDelay(10);
   }
   /* USER CODE END StartTask05MS5803 */
@@ -300,9 +335,12 @@ void StartTask06BackEnd(void const * argument)
   {
     time_consume[app_backend_time_index][0] = get_sys_time_us();
     det_t_s.det_t_app_backend_s = get_cycle_time(app_backend_time_index);
-    //app_ins_thread(det_t_s.det_t_app_backend_s);
+    //读取惯导数据
+    MPU9250_process();
+    //导航解算
     app_ins_ekf_quaternion_thread(det_t_s.det_t_app_backend_s);
-    app_ctrl_thread(det_t_s.det_t_app_backend_s);
+    //控制
+    //app_ctrl_thread(det_t_s.det_t_app_backend_s);
     time_consume[app_backend_time_index][1] = get_sys_time_us();
     app_backend_time_consume_us = time_consume[app_backend_time_index][1] - time_consume[app_backend_time_index][0];
     osDelay(10);
@@ -318,13 +356,30 @@ void StartTask07UWB(void const * argument)
   for(;;)
   {
     time_consume[app_uwb_time_index][0] = get_sys_time_us();
-    det_t_s.det_t_app_backend_s = get_cycle_time(app_uwb_time_index);
-    app_uwb_thread();
+    det_t_s.det_t_app_uwb_s = get_cycle_time(app_uwb_time_index);
+    //app_uwb_thread();
     time_consume[app_uwb_time_index][1] = get_sys_time_us();
     app_uwb_time_consume_us = time_consume[app_uwb_time_index][1] - time_consume[app_uwb_time_index][0];
     osDelay(50);
   }
   /* USER CODE END StartTask07UWB */
+}
+
+/* StartTask08GPS function */
+void StartTask08GPS(void const * argument)
+{
+  /* USER CODE BEGIN StartTask08GPS */
+  /* Infinite loop */
+  for(;;)
+  {
+    time_consume[gps_m8n_time_index][0] = get_sys_time_us();
+    det_t_s.det_t_gps_m8n_s = get_cycle_time(gps_m8n_time_index);
+    //gps_m8n_thread(det_t_s.det_t_gps_m8n_s);
+    time_consume[gps_m8n_time_index][1] = get_sys_time_us();
+    gps_m8n_time_consume_us = time_consume[gps_m8n_time_index][1] - time_consume[gps_m8n_time_index][0];
+    osDelay(50);
+  }
+  /* USER CODE END StartTask08GPS */
 }
 
 /* USER CODE BEGIN Application */

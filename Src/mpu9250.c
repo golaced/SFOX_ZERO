@@ -1,31 +1,34 @@
-
 #include "mpu9250.h"
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 #include "flash_on_chip.h"
 
-
 #define MAG_READ_DELAY 30
-
 #define MPU9250_Byte16(Type, ByteH, ByteL)  ((Type)((((uint16_t)(ByteH))<<8) | ((uint16_t)(ByteL))))
 #define MPU9250_ON  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET)
 #define MPU9250_OFF HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_SET)
 #define CALIBRATING_GYRO_CYCLES             2048
 
+//MPU9250数据结构体
+_MPU9250 mpu9250;
+//二值信号量
 extern osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
 extern osSemaphoreId myBinarySem02LED1ONHandle;
 extern osSemaphoreId myBinarySem03LED2ONHandle;
 extern osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
-
+//队列
+extern osMessageQId myQueue01MPU9250ToANOHandle;
+extern osMessageQId myQueue03MPU9250ToInsHandle;
+//驱动相关
 SPI_HandleTypeDef *MPU9250_Handler;
 char mpu_data_ok;
-uint8_t MPU9250_data_buffer[28];//9250ԭʼ����
+uint8_t MPU9250_data_buffer[28];
 
-float accx_raw_mps, accy_raw_mps, accz_raw_mps;
-float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
-float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
-float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
-float magx_raw_uT, magy_raw_uT, magz_raw_uT;
+// float accx_raw_mps, accy_raw_mps, accz_raw_mps;
+// float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
+// float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
+// float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
+// float magx_raw_uT, magy_raw_uT, magz_raw_uT;
 
 float magx_offset,magy_offset,magz_offset;
 float magx_gain = 1;
@@ -153,12 +156,6 @@ uint8_t MPU9250_Mag_Init(void) {
 #define MPU9250_InitRegNum 10
 void MPU9250_Init(SPI_HandleTypeDef *hspi) {
 	MPU9250_Handler = hspi;
-        gyrox_raw_bias_dps = 0; 
-        gyroy_raw_bias_dps = 0, 
-        gyroz_raw_bias_dps = 0;
-        accx_raw_bias_mps = 0;
-        accy_raw_bias_mps = 0;
-        accz_raw_bias_mps = 0;
 	uint8_t i = 0;
 	uint8_t MPU6500_InitData[MPU9250_InitRegNum][2] = {
 		//{ 0x80, MPU6500_PWR_MGMT_1 },     // Reset Device
@@ -302,13 +299,13 @@ void MPU9250_gyro_acc_calibrate_offset_func(float gyrox, float gyroy, float gyro
           gyrox_low  = (float)gyrox;
           gyrox_high = (float)gyrox;
           
-          gyrox_raw_bias_dps = 0;
-          gyroy_raw_bias_dps = 0;
-          gyroz_raw_bias_dps = 0;
+          mpu9250.gyrox_raw_bias_dps = 0;
+          mpu9250.gyroy_raw_bias_dps = 0;
+          mpu9250.gyroz_raw_bias_dps = 0;
 
-          accx_raw_bias_mps = 0;
-          accy_raw_bias_mps = 0;
-          accz_raw_bias_mps = 0;
+          mpu9250.accx_raw_bias_mps = 0;
+          mpu9250.accy_raw_bias_mps = 0;
+          mpu9250.accz_raw_bias_mps = 0;
           osSemaphoreRelease(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle);// �ͷ��ź���
           return;
   }
@@ -316,13 +313,13 @@ void MPU9250_gyro_acc_calibrate_offset_func(float gyrox, float gyroy, float gyro
   {
           cnt_g = 0;
 
-          gyrox_raw_bias_dps  = tempGyro[0]/(float)CALIBRATING_GYRO_CYCLES;
-          gyroy_raw_bias_dps  = tempGyro[1]/(float)CALIBRATING_GYRO_CYCLES;
-          gyroz_raw_bias_dps  = tempGyro[2]/(float)CALIBRATING_GYRO_CYCLES;
+          mpu9250.gyrox_raw_bias_dps  = tempGyro[0]/(float)CALIBRATING_GYRO_CYCLES;
+          mpu9250.gyroy_raw_bias_dps  = tempGyro[1]/(float)CALIBRATING_GYRO_CYCLES;
+          mpu9250.gyroz_raw_bias_dps  = tempGyro[2]/(float)CALIBRATING_GYRO_CYCLES;
           
-          accx_raw_bias_mps = tempAcc[0]/(float)CALIBRATING_GYRO_CYCLES;
-          accy_raw_bias_mps = tempAcc[1]/(float)CALIBRATING_GYRO_CYCLES;
-          accz_raw_bias_mps = tempAcc[2]/(float)CALIBRATING_GYRO_CYCLES;
+          mpu9250.accx_raw_bias_mps = tempAcc[0]/(float)CALIBRATING_GYRO_CYCLES;
+          mpu9250.accy_raw_bias_mps = tempAcc[1]/(float)CALIBRATING_GYRO_CYCLES;
+          mpu9250.accz_raw_bias_mps = tempAcc[2]/(float)CALIBRATING_GYRO_CYCLES;
           
           flash_save_parameters();
 
@@ -363,12 +360,12 @@ void MPU9250_mag_calibrate(int stage, float magx, float magy, float magz)
 	static int cnt = 0;
 	if(cnt++ == 0)
 	{
-		magx_offset = 0;
-		magy_offset = 0;
-		magz_offset = 0;
-		magx_gain = 1;
-		magy_gain = 1;
-		magz_gain = 1;
+		mpu9250.magx_offset = 0;
+		mpu9250.magy_offset = 0;
+		mpu9250.magz_offset = 0;
+		mpu9250.magx_gain = 1;
+		mpu9250.magy_gain = 1;
+		mpu9250.magz_gain = 1;
 		return;
 	}
 
@@ -385,13 +382,13 @@ void MPU9250_mag_calibrate(int stage, float magx, float magy, float magz)
 	}
 	if(stage == 0)
 	{
-		magx_offset = (magx_low + magx_high) * 0.5f;
-		magy_offset = (magy_low + magy_high) * 0.5f;
-		magz_offset = (magz_low + magz_high) * 0.5f;
+		mpu9250.magx_offset = (magx_low + magx_high) * 0.5f;
+		mpu9250.magy_offset = (magy_low + magy_high) * 0.5f;
+		mpu9250.magz_offset = (magz_low + magz_high) * 0.5f;
 
-		magx_gain = 1;
-		magy_gain = (magx_high - magx_low)/(magy_high - magy_low);
-		magz_gain = (magx_high - magx_low)/(magz_high - magz_low);
+		mpu9250.magx_gain = 1;
+		mpu9250.magy_gain = (magx_high - magx_low)/(magy_high - magy_low);
+		mpu9250.magz_gain = (magx_high - magx_low)/(magz_high - magz_low);
 
 		flash_save_parameters();
 
@@ -403,23 +400,26 @@ void MPU9250_data_push(void)
 {
 	//机头-X 右侧-Y 下方-Z   NED北东地坐标系
 	//+-4g m/s^2
-	accx_raw_mps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[0], MPU9250_data_buffer[1]))*MPU9250A_4g;
-	accy_raw_mps = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[2], MPU9250_data_buffer[3]))*MPU9250A_4g;
-	accz_raw_mps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[4], MPU9250_data_buffer[5]))*MPU9250A_4g;
+	mpu9250.accx_raw_mps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[0], MPU9250_data_buffer[1]))*MPU9250A_4g;
+	mpu9250.accy_raw_mps = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[2], MPU9250_data_buffer[3]))*MPU9250A_4g;
+	mpu9250.accz_raw_mps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[4], MPU9250_data_buffer[5]))*MPU9250A_4g;
 
 	//+-1000dps  
-	gyrox_raw_dps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[8], MPU9250_data_buffer[9]))*MPU9250G_1000dps;
-	gyroy_raw_dps = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[10], MPU9250_data_buffer[11]))*MPU9250G_1000dps;
-	gyroz_raw_dps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[12], MPU9250_data_buffer[13]))*MPU9250G_1000dps;
+	mpu9250.gyrox_raw_dps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[8], MPU9250_data_buffer[9]))*MPU9250G_1000dps;
+	mpu9250.gyroy_raw_dps = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[10], MPU9250_data_buffer[11]))*MPU9250G_1000dps;
+	mpu9250.gyroz_raw_dps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[12], MPU9250_data_buffer[13]))*MPU9250G_1000dps;
 
 	//NOTE:mag data's order is Y - X - Z
-	magy_raw_uT = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[16], MPU9250_data_buffer[15]))*MPU9250M_4800uT;
-	magx_raw_uT = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[18], MPU9250_data_buffer[17]))*MPU9250M_4800uT;
-	magz_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[20], MPU9250_data_buffer[19]))*MPU9250M_4800uT;
+	mpu9250.magy_raw_uT = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[16], MPU9250_data_buffer[15]))*MPU9250M_4800uT;
+	mpu9250.magx_raw_uT = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[18], MPU9250_data_buffer[17]))*MPU9250M_4800uT;
+	mpu9250.magz_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[20], MPU9250_data_buffer[19]))*MPU9250M_4800uT;
 
-	magx_raw_uT = magx_gain * (magx_raw_uT - magx_offset);
-	magy_raw_uT = magy_gain * (magy_raw_uT - magy_offset);
-	magz_raw_uT = magz_gain * (magz_raw_uT - magz_offset);
+	mpu9250.magx_raw_uT = mpu9250.magx_gain * (mpu9250.magx_raw_uT - mpu9250.magx_offset);
+	mpu9250.magy_raw_uT = mpu9250.magy_gain * (mpu9250.magy_raw_uT - mpu9250.magy_offset);
+	mpu9250.magz_raw_uT = mpu9250.magz_gain * (mpu9250.magz_raw_uT - mpu9250.magz_offset);
+
+	osMessagePut(myQueue01MPU9250ToANOHandle,(uint32_t)&mpu9250,0);
+	osMessagePut(myQueue03MPU9250ToInsHandle,(uint32_t)&mpu9250,0);
 }
 
 void MPU9250_process(void)
@@ -434,7 +434,7 @@ void MPU9250_process(void)
   //水平静置校准加速度计&磁强计
   if(osOK == osSemaphoreWait(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle,0))
   {
-    MPU9250_gyro_acc_calibrate_offset_func(gyrox_raw_dps,gyroy_raw_dps,gyroz_raw_dps,accx_raw_mps, accy_raw_mps, accz_raw_mps);
+    MPU9250_gyro_acc_calibrate_offset_func(mpu9250.gyrox_raw_dps,mpu9250.gyroy_raw_dps,mpu9250.gyroz_raw_dps,mpu9250.accx_raw_mps, mpu9250.accy_raw_mps, mpu9250.accz_raw_mps);
     osSemaphoreRelease(myBinarySem02LED1ONHandle);// 
   }
   //三轴旋转校准磁强计
@@ -449,12 +449,12 @@ void MPU9250_process(void)
   }
   if(MPU9250MagCalibrateStart==1)
   {
-    MPU9250_mag_calibrate(MPU9250MagCalibrateStart, magx_raw_uT,magy_raw_uT,magz_raw_uT);
+    MPU9250_mag_calibrate(MPU9250MagCalibrateStart, mpu9250.magx_raw_uT,mpu9250.magy_raw_uT,mpu9250.magz_raw_uT);
     if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
     {
       MPU9250MagCalibrateStart = 0;
       osSemaphoreRelease(myBinarySem02LED1ONHandle);// 
-      MPU9250_mag_calibrate(MPU9250MagCalibrateStart, magx_raw_uT,magy_raw_uT,magz_raw_uT);
+      MPU9250_mag_calibrate(MPU9250MagCalibrateStart, mpu9250.magx_raw_uT,mpu9250.magy_raw_uT,mpu9250.magz_raw_uT);
     }
   }
 }

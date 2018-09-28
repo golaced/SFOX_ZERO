@@ -25,9 +25,9 @@ static int data_from_ros_updata;
 void ros_sending(void)
 {
   ros_send_15_data(
-  (int32_t)(accx_raw_mps*1000),(int32_t)(accy_raw_mps*1000),(int32_t)(accz_raw_mps*1000),
-  (int32_t)(gyrox_raw_dps*1000),(int32_t)(gyroy_raw_dps*1000),(int32_t)(gyroz_raw_dps*1000),
-  (int32_t)(magx_raw_uT),(int32_t)(magy_raw_uT),(int32_t)(magz_raw_uT),
+  (int32_t)(mpu9250.accx_raw_mps*1000),(int32_t)(mpu9250.accy_raw_mps*1000),(int32_t)(mpu9250.accz_raw_mps*1000),
+  (int32_t)(mpu9250.gyrox_raw_dps*1000),(int32_t)(mpu9250.gyroy_raw_dps*1000),(int32_t)(mpu9250.gyroz_raw_dps*1000),
+  (int32_t)(mpu9250.magx_raw_uT),(int32_t)(mpu9250.magy_raw_uT),(int32_t)(mpu9250.magz_raw_uT),
   (int32_t)(anchor[0].distance_mm),(int32_t)(anchor[1].distance_mm),(int32_t)(anchor[2].distance_mm),
   (int32_t)(anchor[3].distance_mm),(int32_t)(anchor[4].distance_mm),(int32_t)(anchor[5].distance_mm));
 }

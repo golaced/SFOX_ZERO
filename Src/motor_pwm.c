@@ -24,7 +24,7 @@ void motor_esc_init(void)
 		;
 	}
 	//判断是否有遥控器数据，如果没有，将油门置于最低点
-	while((RC_PWM[0]+RC_PWM[1]+RC_PWM[2]+RC_PWM[3])==0)
+	if((RC_PWM[0]+RC_PWM[1]+RC_PWM[2]+RC_PWM[3])==0)
 	{
 		motor_pwm_set_value(esc_min,esc_min,esc_min,esc_min);
 		HAL_Delay(1000);

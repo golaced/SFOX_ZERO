@@ -89,21 +89,21 @@ void flash_save_parameters(void)
 	flash_float_to_byte(save_arry, (short)52, &(pid18_i));
 	flash_float_to_byte(save_arry, (short)53, &(pid18_d));
         
-    flash_float_to_byte(save_arry, (short)54, &(gyrox_raw_bias_dps));
-	flash_float_to_byte(save_arry, (short)55, &(gyroy_raw_bias_dps));
-	flash_float_to_byte(save_arry, (short)56, &(gyroz_raw_bias_dps));
+    flash_float_to_byte(save_arry, (short)54, &(mpu9250.gyrox_raw_bias_dps));
+	flash_float_to_byte(save_arry, (short)55, &(mpu9250.gyroy_raw_bias_dps));
+	flash_float_to_byte(save_arry, (short)56, &(mpu9250.gyroz_raw_bias_dps));
         
-    flash_float_to_byte(save_arry, (short)57, &(accx_raw_bias_mps));
-	flash_float_to_byte(save_arry, (short)58, &(accy_raw_bias_mps));
-	flash_float_to_byte(save_arry, (short)59, &(accz_raw_bias_mps));
+    flash_float_to_byte(save_arry, (short)57, &(mpu9250.accx_raw_bias_mps));
+	flash_float_to_byte(save_arry, (short)58, &(mpu9250.accy_raw_bias_mps));
+	flash_float_to_byte(save_arry, (short)59, &(mpu9250.accz_raw_bias_mps));
 
-	flash_float_to_byte(save_arry, (short)60, &(magx_offset));
-	flash_float_to_byte(save_arry, (short)61, &(magy_offset));
-	flash_float_to_byte(save_arry, (short)62, &(magz_offset));
+	flash_float_to_byte(save_arry, (short)60, &(mpu9250.magx_offset));
+	flash_float_to_byte(save_arry, (short)61, &(mpu9250.magy_offset));
+	flash_float_to_byte(save_arry, (short)62, &(mpu9250.magz_offset));
 
-	flash_float_to_byte(save_arry, (short)63, &(magx_gain));
-	flash_float_to_byte(save_arry, (short)64, &(magy_gain));
-	flash_float_to_byte(save_arry, (short)65, &(magz_gain));
+	flash_float_to_byte(save_arry, (short)63, &(mpu9250.magx_gain));
+	flash_float_to_byte(save_arry, (short)64, &(mpu9250.magy_gain));
+	flash_float_to_byte(save_arry, (short)65, &(mpu9250.magz_gain));
 
 	UpdateTheFLASH(FLASH_USER_START_ADDR, (uint8_t *)save_arry, sizeof(save_arry));
 }
@@ -188,21 +188,21 @@ uint8_t flash_read_parameters(void)
 		flash_byte_to_float(save_arry, (short)52, &(pid18_i));
 		flash_byte_to_float(save_arry, (short)53, &(pid18_d));
                 
-		flash_byte_to_float(save_arry, (short)54, &(gyrox_raw_bias_dps));
-		flash_byte_to_float(save_arry, (short)55, &(gyroy_raw_bias_dps));
-		flash_byte_to_float(save_arry, (short)56, &(gyroz_raw_bias_dps));
+		flash_byte_to_float(save_arry, (short)54, &(mpu9250.gyrox_raw_bias_dps));
+		flash_byte_to_float(save_arry, (short)55, &(mpu9250.gyroy_raw_bias_dps));
+		flash_byte_to_float(save_arry, (short)56, &(mpu9250.gyroz_raw_bias_dps));
 		
-		flash_byte_to_float(save_arry, (short)57, &(accx_raw_bias_mps));
-		flash_byte_to_float(save_arry, (short)58, &(accy_raw_bias_mps));
-		flash_byte_to_float(save_arry, (short)59, &(accz_raw_bias_mps));
+		flash_byte_to_float(save_arry, (short)57, &(mpu9250.accx_raw_bias_mps));
+		flash_byte_to_float(save_arry, (short)58, &(mpu9250.accy_raw_bias_mps));
+		flash_byte_to_float(save_arry, (short)59, &(mpu9250.accz_raw_bias_mps));
 
-		flash_byte_to_float(save_arry, (short)60, &(magx_offset));
-		flash_byte_to_float(save_arry, (short)61, &(magy_offset));
-		flash_byte_to_float(save_arry, (short)62, &(magz_offset));
+		flash_byte_to_float(save_arry, (short)60, &(mpu9250.magx_offset));
+		flash_byte_to_float(save_arry, (short)61, &(mpu9250.magy_offset));
+		flash_byte_to_float(save_arry, (short)62, &(mpu9250.magz_offset));
 
-		flash_byte_to_float(save_arry, (short)63, &(magx_gain));
-		flash_byte_to_float(save_arry, (short)64, &(magy_gain));
-		flash_byte_to_float(save_arry, (short)65, &(magz_gain));
+		flash_byte_to_float(save_arry, (short)63, &(mpu9250.magx_gain));
+		flash_byte_to_float(save_arry, (short)64, &(mpu9250.magy_gain));
+		flash_byte_to_float(save_arry, (short)65, &(mpu9250.magz_gain));
 
 		return 0;
 	}
