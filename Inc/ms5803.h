@@ -28,18 +28,24 @@ extern SPI_HandleTypeDef hspi1;
 
 extern SPI_HandleTypeDef *MS5803_Handler;
 
-extern double MS5803_pressure;
-extern double MS5803_temperature;
+typedef struct{
+    double pressure;
+    double temperature;
+    float pressure_launch;
+    float height_from_launch_point;
+}_MS5803;
 
-extern uint16_t MS5803_C1;
-extern uint16_t MS5803_C2;
-extern uint16_t MS5803_C3;
-extern uint16_t MS5803_C4;
-extern uint16_t MS5803_C5;
-extern uint16_t MS5803_C6;
+extern _MS5803 ms5803;
 
-extern uint32_t MS5803_D1;
-extern uint32_t MS5803_D2;
+// extern uint16_t MS5803_C1;
+// extern uint16_t MS5803_C2;
+// extern uint16_t MS5803_C3;
+// extern uint16_t MS5803_C4;
+// extern uint16_t MS5803_C5;
+// extern uint16_t MS5803_C6;
+
+// extern uint32_t MS5803_D1;
+// extern uint32_t MS5803_D2;
 
 void MS5803_Init(SPI_HandleTypeDef *hspi);
 uint8_t MS5803_ReadReg(uint8_t ReadAddr);

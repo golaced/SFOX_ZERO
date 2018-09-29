@@ -6,7 +6,7 @@
 #define DEG_TO_RAD 0.01745329251994329576f
 #define RAD_TO_DEG 57.29577951308232087679f
 
-extern SPI_HandleTypeDef hspi3;
+// extern SPI_HandleTypeDef hspi1;
 
 /*----Sensitivity--------------------------------------------------------*/
 
@@ -170,11 +170,17 @@ extern SPI_HandleTypeDef hspi3;
 extern SPI_HandleTypeDef *MPU9250_Handler;
 
 typedef struct{
+    //
     float accx_raw_mps, accy_raw_mps, accz_raw_mps;
+    float accx_smooth_mps, accy_smooth_mps, accz_smooth_mps;
     float accx_raw_bias_mps, accy_raw_bias_mps, accz_raw_bias_mps;
+    //
     float gyrox_raw_dps, gyroy_raw_dps, gyroz_raw_dps;
+    float gyrox_smooth_dps, gyroy_smooth_dps, gyroz_smooth_dps;
     float gyrox_raw_bias_dps, gyroy_raw_bias_dps, gyroz_raw_bias_dps;
+    //
     float magx_raw_uT, magy_raw_uT, magz_raw_uT;
+    float magx_smooth_uT, magy_smooth_uT, magz_smooth_uT;
     float magx_offset,magy_offset,magz_offset;
     float magx_gain,magy_gain,magz_gain;
 }_MPU9250;
@@ -202,6 +208,7 @@ uint8_t MPU9250_Check(void);
 void MPU9250_read_raw_data(void);
 void MPU9250_data_ready_to_read(void);
 void MPU9250_data_push(void);
+void MPU9250_Calibrate(void);
 void MPU9250_gyro_acc_calibrate_offset_func(float gyrox, float gyroy, float gyroz, float accx, float accy, float accz);
 void MPU9250_mag_calibrate(int stage, float magx, float magy, float magz);
 void MPU9250_process(void);

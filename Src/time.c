@@ -6,6 +6,7 @@ float cycle_T[20][3];
 unsigned long long time_consume[GET_TIME_NUM][2];
 int normal_time_consume_us;
 int real_time_consume_us;
+int mpu9250_process_time_consume_us;
 Det_t det_t_s;
 
 float get_cycle_time(int item)

@@ -73,9 +73,9 @@ osThreadId myTask02NormalHandle;
 osThreadId myTask01RealTimHandle;
 osThreadId myTask03LEDHandle;
 osThreadId myTask04COMHandle;
+osThreadId myTask05IMUHandle;
+osThreadId myTask06IMUAUXHandle;
 osMessageQId myQueue02GPSM8NToInsHandle;
-osMessageQId myQueue01MPU9250ToANOHandle;
-osMessageQId myQueue03MPU9250ToInsHandle;
 osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
 osSemaphoreId myBinarySem02LED1ONHandle;
 osSemaphoreId myBinarySem03LED2ONHandle;
@@ -94,6 +94,8 @@ void StartTask02Normal(void const * argument);
 void StartTask01RealTime(void const * argument);
 void StartTask03LED(void const * argument);
 void StartTask04COM(void const * argument);
+void StartTask05IMU(void const * argument);
+void StartTask06IMUAUX(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -187,7 +189,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityIdle, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of myTask02Normal */
@@ -206,6 +208,14 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(myTask04COM, StartTask04COM, osPriorityIdle, 0, 128);
   myTask04COMHandle = osThreadCreate(osThread(myTask04COM), NULL);
 
+  /* definition and creation of myTask05IMU */
+  osThreadDef(myTask05IMU, StartTask05IMU, osPriorityHigh, 0, 128);
+  myTask05IMUHandle = osThreadCreate(osThread(myTask05IMU), NULL);
+
+  /* definition and creation of myTask06IMUAUX */
+  osThreadDef(myTask06IMUAUX, StartTask06IMUAUX, osPriorityIdle, 0, 128);
+  myTask06IMUAUXHandle = osThreadCreate(osThread(myTask06IMUAUX), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -215,16 +225,6 @@ void MX_FREERTOS_Init(void) {
 /* what about the sizeof here??? cd native code */
   osMessageQDef(myQueue02GPSM8NToIns, 1, uint32_t);
   myQueue02GPSM8NToInsHandle = osMessageCreate(osMessageQ(myQueue02GPSM8NToIns), NULL);
-
-  /* definition and creation of myQueue01MPU9250ToANO */
-/* what about the sizeof here??? cd native code */
-  osMessageQDef(myQueue01MPU9250ToANO, 1, uint32_t);
-  myQueue01MPU9250ToANOHandle = osMessageCreate(osMessageQ(myQueue01MPU9250ToANO), NULL);
-
-  /* definition and creation of myQueue03MPU9250ToIns */
-/* what about the sizeof here??? cd native code */
-  osMessageQDef(myQueue03MPU9250ToIns, 1, uint32_t);
-  myQueue03MPU9250ToInsHandle = osMessageCreate(osMessageQ(myQueue03MPU9250ToIns), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -264,7 +264,7 @@ void StartTask02Normal(void const * argument)
     //
     time_consume[normal_task_time_index][1] = get_sys_time_us();
     normal_time_consume_us = time_consume[normal_task_time_index][1] - time_consume[normal_task_time_index][0];
-    osDelay(20-(int)(normal_time_consume_us*0.001f));
+    osDelay(10-(int)(normal_time_consume_us*0.001f));
   }
   /* USER CODE END StartTask02Normal */
 }
@@ -279,9 +279,6 @@ void StartTask01RealTime(void const * argument)
     //时间统计[
     time_consume[realtime_task_time_index][0] = get_sys_time_us();
     det_t_s.det_t_realtime_task_s = get_cycle_time(realtime_task_time_index);
-    //惯导读取任务
-    det_t_s.det_t_mpu9250_process_s = get_cycle_time(mpu9250_process_time_index);
-    MPU9250_process();
     //导航解算任务
     det_t_s.det_t_app_ins_s = get_cycle_time(app_ins_time_index);
     app_ins_ekf_quaternion_thread(det_t_s.det_t_app_ins_s);
@@ -291,7 +288,7 @@ void StartTask01RealTime(void const * argument)
     //时间统计]
     time_consume[realtime_task_time_index][1] = get_sys_time_us();
     real_time_consume_us = time_consume[realtime_task_time_index][1] - time_consume[realtime_task_time_index][0];
-    osDelay(10-(int)(real_time_consume_us*0.001f));
+    osDelay(8-(int)(real_time_consume_us*0.001f));
   }
   /* USER CODE END StartTask01RealTime */
 }
@@ -323,6 +320,37 @@ void StartTask04COM(void const * argument)
     osDelay(20);
   }
   /* USER CODE END StartTask04COM */
+}
+
+/* StartTask05IMU function */
+void StartTask05IMU(void const * argument)
+{
+  /* USER CODE BEGIN StartTask05IMU */
+  /* Infinite loop */
+  for(;;)
+  {
+    time_consume[mpu9250_process_time_index][0] = get_sys_time_us();
+    //惯导读取任务
+    det_t_s.det_t_mpu9250_process_s = get_cycle_time(mpu9250_process_time_index);
+    MPU9250_process();
+    time_consume[mpu9250_process_time_index][1] = get_sys_time_us();
+    mpu9250_process_time_consume_us = time_consume[mpu9250_process_time_index][1] - time_consume[mpu9250_process_time_index][0];
+    osDelay(1-(int)(mpu9250_process_time_consume_us*0.001f));
+  }
+  /* USER CODE END StartTask05IMU */
+}
+
+/* StartTask06IMUAUX function */
+void StartTask06IMUAUX(void const * argument)
+{
+  /* USER CODE BEGIN StartTask06IMUAUX */
+  /* Infinite loop */
+  for(;;)
+  {
+    MPU9250_Calibrate();
+    osDelay(10);
+  }
+  /* USER CODE END StartTask06IMUAUX */
 }
 
 /* USER CODE BEGIN Application */

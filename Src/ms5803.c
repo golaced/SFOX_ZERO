@@ -1,6 +1,7 @@
 #include "ms5803.h"
 #include "stm32f4xx_hal.h"
 #include "USART.h"
+#include <math.h>
 
 #define MS5803_ON  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET)
 #define MS5803_OFF HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET)
@@ -15,12 +16,30 @@ uint16_t MS5803_C6;
 uint32_t MS5803_D1;
 uint32_t MS5803_D2;
 
-double MS5803_pressure;
-double MS5803_temperature;
+_MS5803 ms5803;
 
 static int d1d2_convert_step = 0;
 
 SPI_HandleTypeDef *MS5803_Handler;
+
+float ms5803_lowpass_0N3D_maxflat_filter_pressure(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
 
 void MS5803_Init(SPI_HandleTypeDef *hspi)
 {
@@ -65,6 +84,14 @@ void MS5803_data_push(void)
 
 void MS5803_caculate(void)
 {
+	//气压高度计算需要的变量与参数
+	static int ms5803_start_cnt;
+	const float _R = 8.314f;	//气体常数
+	const float _G = 9.80665f;	//重力加速度
+	const float _M = 29.0f;		//空气分子量
+	const float _K0 = 273.15;	//热力学温度
+
+
 	int64_t dT = MS5803_D2 - MS5803_C5 * 256;
 	int64_t TEMP = 2000 + dT * MS5803_C6 / (8388608);
 	int64_t T2;
@@ -99,8 +126,30 @@ void MS5803_caculate(void)
 	OFF = OFF - OFF2;
 	SENS = SENS - SENS2;
 	P = (MS5803_D1 * SENS / (2097152) - OFF) / (32768);
-	MS5803_temperature = TEMP*0.01f;//��
-	MS5803_pressure = P*0.01f;//mbar
+	ms5803.temperature = TEMP*0.01f;//��
+	ms5803.pressure = P*0.01f;//mbar
+	//ms5803.pressure = ms5803_lowpass_0N3D_maxflat_filter_pressure(P*0.01f);//mbar
+	//计算气压高度
+	if(ms5803_start_cnt<200)
+	{
+		ms5803_start_cnt ++ ;
+	}
+	if(ms5803_start_cnt>=200 && ms5803_start_cnt<203)
+	{
+		ms5803.pressure_launch += ms5803.pressure;
+		ms5803_start_cnt ++ ;
+	}
+	if(ms5803_start_cnt==203)
+	{
+		ms5803_start_cnt = 10000 ;
+		ms5803.pressure_launch = ms5803.pressure_launch / 3.0f;
+	}
+	if(ms5803_start_cnt == 10000)
+	{
+		ms5803.height_from_launch_point = -1000.0f*(_R*(ms5803.temperature+_K0)/(_M*_G))*log(ms5803.pressure/ms5803.pressure_launch);
+		ms5803.height_from_launch_point = ms5803_lowpass_0N3D_maxflat_filter_pressure(ms5803.height_from_launch_point);
+	}
+	
 }
 
 void MS5803_read_data(void)

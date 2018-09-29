@@ -24,7 +24,7 @@
 extern osSemaphoreId myBinarySem01MPU9250GyroAccCalibrateOffsetHandle;
 extern osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
 
-extern osMessageQId myQueue01MPU9250ToANOHandle;
+//extern osMessageQId myQueue01MPU9250ToANOHandle;
 
 static uint8_t ano_data_to_send[100];	//
 static uint8_t RxBuffer[50];		//
@@ -94,30 +94,41 @@ int ANO_sending(int mode)
 	{
 		if ((get_data_from_ANO == 0) && (send_pid_para == 0))
 		{
-			osEvent mpu9250_evt;
-			mpu9250_evt = osMessageGet(myQueue01MPU9250ToANOHandle,0);
+			//osEvent mpu9250_evt;
+			//mpu9250_evt = osMessageGet(myQueue01MPU9250ToANOHandle,0);
 			//
-			int16_t data1=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accx_raw_mps);
-			int16_t data2=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accy_raw_mps);
-			int16_t data3=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accz_raw_mps);
+			// int16_t data1=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accx_smooth_mps);
+			// int16_t data2=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accy_smooth_mps);
+			// int16_t data3=(int16_t)(1000*(*((_MPU9250*)mpu9250_evt.value.v)).accz_smooth_mps);
 
-			int16_t data4=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyrox_raw_dps);
-			int16_t data5=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyroy_raw_dps);
-			int16_t data6=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyroz_raw_dps);
+			// int16_t data4=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyrox_smooth_dps);
+			// int16_t data5=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyroy_smooth_dps);
+			// int16_t data6=(int16_t)(1*(*((_MPU9250*)mpu9250_evt.value.v)).gyroz_smooth_dps);
 
-			int16_t data7=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_raw_uT;
-			int16_t data8=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magy_raw_uT;
-			int16_t data9=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magz_raw_uT;
+			// int16_t data7=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magx_smooth_uT;
+			// int16_t data8=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magy_smooth_uT;
+			// int16_t data9=(int16_t)(*((_MPU9250*)mpu9250_evt.value.v)).magz_smooth_uT;
+			int16_t data1=(int16_t)(1000*(mpu9250.accx_smooth_mps));
+			int16_t data2=(int16_t)(1000*(mpu9250.accy_smooth_mps));
+			int16_t data3=(int16_t)(1000*(mpu9250.accz_smooth_mps));
+
+			int16_t data4=(int16_t)(1*(mpu9250.gyrox_smooth_dps));
+			int16_t data5=(int16_t)(1*(mpu9250.gyroy_smooth_dps));
+			int16_t data6=(int16_t)(1*(mpu9250.gyroz_smooth_dps));
+
+			int16_t data7=(int16_t)mpu9250.magx_smooth_uT;
+			int16_t data8=(int16_t)mpu9250.magy_smooth_uT;
+			int16_t data9=(int16_t)mpu9250.magz_smooth_uT;
                         
                         //int16_t data9 = (int16_t)(det_t_s.det_t_app_backend_s*1000);
 
 			//float dataA,dataB,dataC;
 			//
 			ANO_send_15_data(
-				(int16_t)(data1), (int16_t)(data2), (int16_t)(data3),
+				(int16_t)(100*ms5803.height_from_launch_point), (int16_t)(ms5803.temperature), (int16_t)(data3),
 				(int16_t)(data4), (int16_t)(data5), (int16_t)(data6),
 				(int16_t)(data7), (int16_t)(data8), (int16_t)(data9),
-				(float)(roll_deg), (float)(pitch_deg), (float)(yaw_deg),
+				(float)(roll_deg), (float)(pitch_deg), (float)(0*yaw_deg),
 				(int32_t)(15), (uint8_t)(13), (uint8_t)(14));
 		}
 	}

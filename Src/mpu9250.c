@@ -17,8 +17,8 @@ extern osSemaphoreId myBinarySem02LED1ONHandle;
 extern osSemaphoreId myBinarySem03LED2ONHandle;
 extern osSemaphoreId myBinarySem04MPU9250MagCalibrateHandle;
 //队列
-extern osMessageQId myQueue01MPU9250ToANOHandle;
-extern osMessageQId myQueue03MPU9250ToInsHandle;
+//extern osMessageQId myQueue01MPU9250ToANOHandle;
+//extern osMessageQId myQueue03MPU9250ToInsHandle;
 //驱动相关
 SPI_HandleTypeDef *MPU9250_Handler;
 char mpu_data_ok;
@@ -396,6 +396,178 @@ void MPU9250_mag_calibrate(int stage, float magx, float magy, float magz)
 	}
 }
 
+float mpu9250_lowpass_0N3D_maxflat_filter_accx(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_accy(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_accz(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_gyrox(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_gyroy(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_gyroz(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_magx(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_magy(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+float mpu9250_lowpass_0N3D_maxflat_filter_magz(float raw)
+{
+	//输入输出缓存
+	static float out[4];
+	int i;
+	//滤波系数
+	float cd[4] = { 1, -2.87438796994731f, 2.75654128930279f, -0.881920488787064f };	//H(Z)分母系数
+	float cn0 =  0.000232830568416609f;	//H(Z)分子系数
+	//滤波过程
+	out[0] = (-cd[1] * out[1] - cd[2] * out[2] - cd[3] * out[3] + cn0 * raw) / cd[0];
+	for (i = 4; i >= 2; i--)
+	{
+		out[i - 1] = out[i - 2];
+	}
+	//超前滤波
+	out[0] = 2 * out[0] - out[3];
+	return (float)out[0];
+}
+
+
 void MPU9250_data_push(void)
 {
 	//机头-X 右侧-Y 下方-Z   NED北东地坐标系
@@ -404,22 +576,64 @@ void MPU9250_data_push(void)
 	mpu9250.accy_raw_mps = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[2], MPU9250_data_buffer[3]))*MPU9250A_4g;
 	mpu9250.accz_raw_mps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[4], MPU9250_data_buffer[5]))*MPU9250A_4g;
 
+	mpu9250.accx_smooth_mps = mpu9250_lowpass_0N3D_maxflat_filter_accx(mpu9250.accx_raw_mps);
+	mpu9250.accy_smooth_mps = mpu9250_lowpass_0N3D_maxflat_filter_accy(mpu9250.accy_raw_mps);
+	mpu9250.accz_smooth_mps = mpu9250_lowpass_0N3D_maxflat_filter_accz(mpu9250.accz_raw_mps);
+
 	//+-1000dps  
 	mpu9250.gyrox_raw_dps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[8], MPU9250_data_buffer[9]))*MPU9250G_1000dps;
 	mpu9250.gyroy_raw_dps = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[10], MPU9250_data_buffer[11]))*MPU9250G_1000dps;
 	mpu9250.gyroz_raw_dps = -(MPU9250_Byte16(int16_t, MPU9250_data_buffer[12], MPU9250_data_buffer[13]))*MPU9250G_1000dps;
+
+	mpu9250.gyrox_smooth_dps = mpu9250_lowpass_0N3D_maxflat_filter_gyrox(mpu9250.gyrox_raw_dps);
+	mpu9250.gyroy_smooth_dps = mpu9250_lowpass_0N3D_maxflat_filter_gyroy(mpu9250.gyroy_raw_dps);
+	mpu9250.gyroz_smooth_dps = mpu9250_lowpass_0N3D_maxflat_filter_gyroz(mpu9250.gyroz_raw_dps);
 
 	//NOTE:mag data's order is Y - X - Z
 	mpu9250.magy_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[16], MPU9250_data_buffer[15]))*MPU9250M_4800uT;
 	mpu9250.magx_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[18], MPU9250_data_buffer[17]))*MPU9250M_4800uT;
 	mpu9250.magz_raw_uT = (MPU9250_Byte16(int16_t, MPU9250_data_buffer[20], MPU9250_data_buffer[19]))*MPU9250M_4800uT;
 
-	mpu9250.magx_raw_uT = mpu9250.magx_gain * (mpu9250.magx_raw_uT - mpu9250.magx_offset);
-	mpu9250.magy_raw_uT = mpu9250.magy_gain * (mpu9250.magy_raw_uT - mpu9250.magy_offset);
-	mpu9250.magz_raw_uT = mpu9250.magz_gain * (mpu9250.magz_raw_uT - mpu9250.magz_offset);
+	mpu9250.magx_smooth_uT = mpu9250_lowpass_0N3D_maxflat_filter_magx(mpu9250.magx_raw_uT);
+	mpu9250.magy_smooth_uT = mpu9250_lowpass_0N3D_maxflat_filter_magy(mpu9250.magy_raw_uT);
+	mpu9250.magz_smooth_uT = mpu9250_lowpass_0N3D_maxflat_filter_magz(mpu9250.magz_raw_uT);
 
-	osMessagePut(myQueue01MPU9250ToANOHandle,(uint32_t)&mpu9250,0);
-	osMessagePut(myQueue03MPU9250ToInsHandle,(uint32_t)&mpu9250,0);
+	mpu9250.magx_smooth_uT = mpu9250.magx_gain * (mpu9250.magx_smooth_uT - mpu9250.magx_offset);
+	mpu9250.magy_smooth_uT = mpu9250.magy_gain * (mpu9250.magy_smooth_uT - mpu9250.magy_offset);
+	mpu9250.magz_smooth_uT = mpu9250.magz_gain * (mpu9250.magz_smooth_uT - mpu9250.magz_offset);
+
+	//osMessagePut(myQueue01MPU9250ToANOHandle,(uint32_t)&mpu9250,0);
+	//osMessagePut(myQueue03MPU9250ToInsHandle,(uint32_t)&mpu9250,0);
+}
+
+void MPU9250_Calibrate(void)
+{
+	//水平静置校准加速度计&磁强计
+	if(osOK == osSemaphoreWait(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle,0))
+	{
+		MPU9250_gyro_acc_calibrate_offset_func(mpu9250.gyrox_smooth_dps,mpu9250.gyroy_smooth_dps,mpu9250.gyroz_smooth_dps,mpu9250.accx_smooth_mps, mpu9250.accy_smooth_mps, mpu9250.accz_smooth_mps);
+		osSemaphoreRelease(myBinarySem02LED1ONHandle);// 
+	}
+	//三轴旋转校准磁强计
+	static int MPU9250MagCalibrateStart = 0;
+	if(MPU9250MagCalibrateStart==0)
+	{
+		if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
+		{
+			MPU9250MagCalibrateStart = 1;
+			osSemaphoreRelease(myBinarySem03LED2ONHandle);// 
+		}
+	}
+	if(MPU9250MagCalibrateStart==1)
+	{
+		MPU9250_mag_calibrate(MPU9250MagCalibrateStart, mpu9250.magx_smooth_uT,mpu9250.magy_smooth_uT,mpu9250.magz_smooth_uT);
+		if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
+		{
+			MPU9250MagCalibrateStart = 0;
+			osSemaphoreRelease(myBinarySem03LED2ONHandle);// 
+			MPU9250_mag_calibrate(MPU9250MagCalibrateStart, mpu9250.magx_smooth_uT,mpu9250.magy_smooth_uT,mpu9250.magz_smooth_uT);
+		}
+	}
 }
 
 void MPU9250_process(void)
@@ -431,31 +645,5 @@ void MPU9250_process(void)
     MPU9250_data_push();
   }
   MPU9250_read_raw_data();
-  //水平静置校准加速度计&磁强计
-  if(osOK == osSemaphoreWait(myBinarySem01MPU9250GyroAccCalibrateOffsetHandle,0))
-  {
-    MPU9250_gyro_acc_calibrate_offset_func(mpu9250.gyrox_raw_dps,mpu9250.gyroy_raw_dps,mpu9250.gyroz_raw_dps,mpu9250.accx_raw_mps, mpu9250.accy_raw_mps, mpu9250.accz_raw_mps);
-    osSemaphoreRelease(myBinarySem02LED1ONHandle);// 
-  }
-  //三轴旋转校准磁强计
-  static int MPU9250MagCalibrateStart = 0;
-  if(MPU9250MagCalibrateStart==0)
-  {
-    if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
-    {
-      MPU9250MagCalibrateStart = 1;
-      osSemaphoreRelease(myBinarySem03LED2ONHandle);// 
-    }
-  }
-  if(MPU9250MagCalibrateStart==1)
-  {
-    MPU9250_mag_calibrate(MPU9250MagCalibrateStart, mpu9250.magx_raw_uT,mpu9250.magy_raw_uT,mpu9250.magz_raw_uT);
-    if(osOK==osSemaphoreWait(myBinarySem04MPU9250MagCalibrateHandle,0))
-    {
-      MPU9250MagCalibrateStart = 0;
-      osSemaphoreRelease(myBinarySem03LED2ONHandle);// 
-      MPU9250_mag_calibrate(MPU9250MagCalibrateStart, mpu9250.magx_raw_uT,mpu9250.magy_raw_uT,mpu9250.magz_raw_uT);
-    }
-  }
 }
 

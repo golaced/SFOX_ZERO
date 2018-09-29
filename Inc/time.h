@@ -38,6 +38,7 @@ extern Det_t det_t_s;
 extern unsigned long long time_consume[GET_TIME_NUM][2];
 extern int normal_time_consume_us;
 extern int real_time_consume_us;
+extern int mpu9250_process_time_consume_us;
 
 
 extern volatile unsigned long long sysTickUptime;
